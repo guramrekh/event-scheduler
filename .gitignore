@@ -1,35 +1,113 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+/target/
+/build/
 
-data/
+# Maven
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar # Maven wrapper JAR (though mvnw and .mvn/wrapper/maven-wrapper.properties *are* usually tracked)
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
+# IntelliJ IDEA
+.idea/
 *.iml
 *.ipr
+*.iws
+.project
+.classpath
+.settings/
+.idea_modules/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# Eclipse
+.apt_generated/
+.factorypath
+.metadata/
+*.launch
+*.springBeans
 
-### VS Code ###
+# VS Code
 .vscode/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+.nb-maven/
+
+
+# OS / Environment Files
+.DS_Store # macOS
+Thumbs.db # Windows
+Desktop.ini # Windows
+*.log
+*.lock
+*.orig
+*.swp
+*.bak
+*.swo
+*~
+.#*
+.#*#
+*.stackdump
+
+
+# Spring Boot Specific
+# Log files
+*.log
+logs/
+nohup.out
+
+# Crash dumps
+hs_err_pid*.log
+
+# STS (Spring Tool Suite) - often based on Eclipse
+.sts4/
+
+
+# Configuration Files (Crucial for Security!)
+application.properties
+application.yml
+application-*.properties
+application-*.yml
+*.key
+*.p12
+*.jks
+*.cst
+*.store
+*.cert
+*.pem
+
+application-local.properties
+application-local.yml
+application-dev.properties # If you have local-only dev properties
+application-test.properties # If you have local-only test properties
+
+
+# Generated Files
+*.class
+
+# Compiled output
+/classes/
+
+# Packages
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+
+
+# Other common temporary files
+.history/ # VS Code history
+
+# SQL/DB specific (if not part of source code)
+*.sql.bak
+*.db

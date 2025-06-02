@@ -27,7 +27,7 @@ public class UserController {
     @PostMapping("/create")
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserCreateDto user) {
         UserResponseDto newUser = userService.createUser(user);
-        URI location = URI.create("user/" + newUser.id());
+        URI location = URI.create("/user/" + newUser.id());
         return ResponseEntity.created(location).body(newUser);
     }
 

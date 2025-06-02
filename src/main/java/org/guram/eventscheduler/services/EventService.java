@@ -3,6 +3,8 @@ package org.guram.eventscheduler.services;
 import org.guram.eventscheduler.DTOs.eventDTOs.EventCreateDto;
 import org.guram.eventscheduler.DTOs.eventDTOs.EventEditDto;
 import org.guram.eventscheduler.DTOs.eventDTOs.EventResponseDto;
+import org.guram.eventscheduler.exceptions.EventNotFoundException;
+import org.guram.eventscheduler.exceptions.UserNotFoundException;
 import org.guram.eventscheduler.models.Event;
 import org.guram.eventscheduler.models.User;
 import org.guram.eventscheduler.repositories.EventRepository;
@@ -32,7 +34,7 @@ public class EventService {
     @Transactional
     public EventResponseDto createEvent(EventCreateDto eventCreateDto) {
         User organizer = userRepo.findById(eventCreateDto.organizerUserId())
-                .orElseThrow(() -> new IllegalArgumentException("Organizer not found (ID=" + eventCreateDto.organizerUserId() + ")"));
+                .orElseThrow(() -> new UserNotFoundException(eventCreateDto.organizerUserId()));
 
         Event event = new Event();
         event.setTitle(eventCreateDto.title());
@@ -50,12 +52,12 @@ public class EventService {
     @Transactional
     public EventResponseDto addOrganizer(Long eventId, Long actorUserId, Long newOrgUserId) {
         Event event = findEventById(eventId)
-                .orElseThrow(() -> new IllegalArgumentException("Event not found (ID=" + eventId + ")"));
+                .orElseThrow(() -> new EventNotFoundException(eventId));
 
         Utils.checkIsOrganizer(actorUserId, event);
 
         User toAdd = userRepo.findById(newOrgUserId)
-                .orElseThrow(() -> new IllegalArgumentException("User to add not found (ID=" + newOrgUserId + ")"));
+                .orElseThrow(() -> new UserNotFoundException(newOrgUserId));
 
         boolean alreadyOrganizer = event.getOrganizers().stream()
                 .anyMatch(u -> u.getId().equals(newOrgUserId));
@@ -73,17 +75,18 @@ public class EventService {
     @Transactional
     public EventResponseDto removeOrganizer(Long eventId, Long actorUserId, Long removeUserId) {
         Event event = findEventById(eventId)
-                .orElseThrow(() -> new IllegalArgumentException("Event not found (ID=" + eventId + ")"));
+                .orElseThrow(() -> new EventNotFoundException(eventId));
 
         Utils.checkIsOrganizer(actorUserId, event);
 
         User toRemove = userRepo.findById(removeUserId)
-                .orElseThrow(() -> new IllegalArgumentException("User to remove not found (ID=" + removeUserId + ")"));
+                .orElseThrow(() -> new UserNotFoundException(removeUserId));
 
         Utils.checkIsOrganizer(removeUserId, event);
 
-        if (event.getOrganizers().size() <= 1)
-            throw new IllegalStateException("Cannot remove only organizer from event (ID=" + eventId + ").");
+        // if both actorUser and removeUser are organizers, at least 2 organizers are present.
+//        if (event.getOrganizers().size() <= 1)
+//            throw new IllegalStateException("Cannot remove only organizer from event (ID=" + eventId + ").");
 
         event.getOrganizers().remove(toRemove);
         toRemove.getOrganizedEvents().remove(event);
@@ -95,7 +98,7 @@ public class EventService {
     @Transactional
     public EventResponseDto editEvent(Long eventId, Long actorUserId, EventEditDto eventEditDto) {
         Event event = findEventById(eventId)
-                .orElseThrow(() -> new IllegalArgumentException("Event not found (ID=" + eventId + ")"));
+                .orElseThrow(() -> new EventNotFoundException(eventId));
 
         Utils.checkIsOrganizer(actorUserId, event);
 
@@ -112,18 +115,22 @@ public class EventService {
         return Utils.mapEventToResponseDto(editedEvent);
     }
 
+    @Transactional
     public void cancelEvent(Long eventId, Long actorUserId) {
         Event event = findEventById(eventId)
-                .orElseThrow(() -> new IllegalArgumentException("Event not found (ID=" + eventId + ")"));
+                .orElseThrow(() -> new EventNotFoundException(eventId));
 
         Utils.checkIsOrganizer(actorUserId, event);
+
+        event.getOrganizers().forEach(organizer -> organizer.getOrganizedEvents().remove(event));
+        event.getOrganizers().clear();
 
         eventRepo.delete(event);
     }
 
     public EventResponseDto getEventById(Long eventId) {
         Event event = findEventById(eventId)
-                .orElseThrow(() -> new IllegalArgumentException("Event not found (ID=" + eventId + ")"));
+                .orElseThrow(() -> new EventNotFoundException(eventId));
 
         return Utils.mapEventToResponseDto(event);
     }

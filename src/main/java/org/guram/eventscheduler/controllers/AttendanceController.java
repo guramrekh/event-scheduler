@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -28,7 +29,8 @@ public class AttendanceController {
                                 @RequestParam Long actorUserId,
                                 @RequestParam Long inviteeUserId) {
         AttendanceResponseDto attendance = attendanceService.inviteUser(eventId, actorUserId, inviteeUserId);
-        return new ResponseEntity<>(attendance, HttpStatus.CREATED);
+        URI location = URI.create("/attendance/" + attendance.id());
+        return ResponseEntity.created(location).body(attendance);
     }
 
     @PutMapping("/respond")

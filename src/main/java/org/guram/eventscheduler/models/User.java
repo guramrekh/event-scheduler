@@ -31,6 +31,6 @@ public class User {
     @ManyToMany(mappedBy = "organizers")
     private Set<Event> organizedEvents = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user")
     private Set<Attendance> attendances = new HashSet<>();
 }

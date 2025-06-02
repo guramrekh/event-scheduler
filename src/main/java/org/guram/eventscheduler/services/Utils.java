@@ -1,14 +1,13 @@
 package org.guram.eventscheduler.services;
 
-import jakarta.validation.constraints.NotNull;
 import org.guram.eventscheduler.DTOs.attendanceDTOs.AttendanceResponseDto;
 import org.guram.eventscheduler.DTOs.eventDTOs.EventResponseDto;
 import org.guram.eventscheduler.DTOs.eventDTOs.EventSummaryDto;
 import org.guram.eventscheduler.DTOs.userDTOs.OrganizerDto;
 import org.guram.eventscheduler.DTOs.userDTOs.UserResponseDto;
 import org.guram.eventscheduler.DTOs.userDTOs.UserSummaryDto;
+import org.guram.eventscheduler.exceptions.ForbiddenOperationException;
 import org.guram.eventscheduler.models.Attendance;
-import org.guram.eventscheduler.models.AttendanceStatus;
 import org.guram.eventscheduler.models.Event;
 import org.guram.eventscheduler.models.User;
 
@@ -16,11 +15,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Utils {
+
     public static void checkIsOrganizer(Long actorUserId, Event event) {
         boolean actorIsOrganizer = event.getOrganizers().stream()
                 .anyMatch(u -> u.getId().equals(actorUserId));
         if (!actorIsOrganizer) {
-            throw new IllegalStateException("User (ID=" + actorUserId + ") is not an organizer for this event.");
+            throw new ForbiddenOperationException("User (ID=" + actorUserId + ") is not an organizer for this event.");
         }
     }
 
@@ -64,17 +64,20 @@ public class Utils {
     }
 
     public static AttendanceResponseDto mapAttendanceToResponseDto(Attendance attendance) {
+        User user = attendance.getUser();
         UserSummaryDto userSummaryDto = new UserSummaryDto(
-                attendance.getUser().getId(),
-                attendance.getUser().getFirstName(),
-                attendance.getUser().getLastName(),
-                attendance.getUser().getEmail()
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail()
         );
+
+        Event event = attendance.getEvent();
         EventSummaryDto eventSummaryDto = new EventSummaryDto(
-                attendance.getEvent().getId(),
-                attendance.getEvent().getTitle(),
-                attendance.getEvent().getDateTime(),
-                attendance.getEvent().getLocation()
+                event.getId(),
+                event.getTitle(),
+                event.getDateTime(),
+                event.getLocation()
         );
 
         return new AttendanceResponseDto(
@@ -84,7 +87,5 @@ public class Utils {
                 attendance.getStatus()
         );
     }
-
-
 
 }

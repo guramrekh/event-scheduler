@@ -2,6 +2,8 @@ package org.guram.eventscheduler.services;
 
 import org.guram.eventscheduler.DTOs.userDTOs.UserCreateDto;
 import org.guram.eventscheduler.DTOs.userDTOs.UserResponseDto;
+import org.guram.eventscheduler.exceptions.ConflictException;
+import org.guram.eventscheduler.exceptions.UserNotFoundException;
 import org.guram.eventscheduler.models.User;
 import org.guram.eventscheduler.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +31,7 @@ public class UserService {
     @Transactional
     public UserResponseDto createUser(UserCreateDto userCreateDto) {
         userRepo.findByEmail(userCreateDto.email()).ifPresent(existing -> {
-            throw new IllegalArgumentException("A user with email " + userCreateDto.email() + " already exists.");
+            throw new ConflictException("A user with email " + userCreateDto.email() + " already exists.");
         });
 
         String rawPassword = userCreateDto.password();
@@ -58,15 +60,13 @@ public class UserService {
 
     public UserResponseDto findUserById(Long id) {
         User user = findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found (ID=" + id + ")"));
-
+                .orElseThrow(() -> new UserNotFoundException(id));
         return Utils.mapUserToResponseDto(user);
     }
 
     public UserResponseDto findUserByEmail(String email) {
         User user = findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User with that email not found"));
-
+                .orElseThrow(() -> new UserNotFoundException("User with email '" + email + "' not found"));
         return Utils.mapUserToResponseDto(user);
     }
 

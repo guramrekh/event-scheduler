@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -27,7 +28,8 @@ public class EventController {
     @PostMapping("/create")
     public ResponseEntity<EventResponseDto> createEvent(@Valid @RequestBody EventCreateDto eventCreateDto) {
         EventResponseDto event = eventService.createEvent(eventCreateDto);
-        return new ResponseEntity<>(event, HttpStatus.CREATED);
+        URI location = URI.create("/event/" + event.id());
+        return ResponseEntity.created(location).body(event);
     }
 
     @GetMapping("/{id}")

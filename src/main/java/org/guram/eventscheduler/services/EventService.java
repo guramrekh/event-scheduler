@@ -1,7 +1,8 @@
 package org.guram.eventscheduler.services;
 
-import org.guram.eventscheduler.DTOs.EventCreateDto;
-import org.guram.eventscheduler.DTOs.EventEditDto;
+import org.guram.eventscheduler.DTOs.eventDTOs.EventCreateDto;
+import org.guram.eventscheduler.DTOs.eventDTOs.EventEditDto;
+import org.guram.eventscheduler.DTOs.eventDTOs.EventResponseDto;
 import org.guram.eventscheduler.models.Event;
 import org.guram.eventscheduler.models.User;
 import org.guram.eventscheduler.repositories.EventRepository;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EventService {
@@ -28,7 +30,7 @@ public class EventService {
 
 
     @Transactional
-    public Event createEvent(EventCreateDto eventCreateDto) {
+    public EventResponseDto createEvent(EventCreateDto eventCreateDto) {
         User organizer = userRepo.findById(eventCreateDto.organizerUserId())
                 .orElseThrow(() -> new IllegalArgumentException("Organizer not found (ID=" + eventCreateDto.organizerUserId() + ")"));
 
@@ -41,11 +43,12 @@ public class EventService {
         event.getOrganizers().add(organizer);
         organizer.getOrganizedEvents().add(event);
 
-        return eventRepo.save(event);
+        Event savedEvent = eventRepo.save(event);
+        return Utils.mapEventToResponseDto(savedEvent);
     }
 
     @Transactional
-    public Event addOrganizer(Long eventId, Long actorUserId, Long newOrgUserId) {
+    public EventResponseDto addOrganizer(Long eventId, Long actorUserId, Long newOrgUserId) {
         Event event = findEventById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found (ID=" + eventId + ")"));
 
@@ -57,17 +60,18 @@ public class EventService {
         boolean alreadyOrganizer = event.getOrganizers().stream()
                 .anyMatch(u -> u.getId().equals(newOrgUserId));
         if (alreadyOrganizer) {
-            return event;
+            return Utils.mapEventToResponseDto(event);
         }
 
         event.getOrganizers().add(toAdd);
         toAdd.getOrganizedEvents().add(event);
 
-        return eventRepo.save(event);
+        Event updatedEvent = eventRepo.save(event);
+        return Utils.mapEventToResponseDto(updatedEvent);
     }
 
     @Transactional
-    public Event removeOrganizer(Long eventId, Long actorUserId, Long removeUserId) {
+    public EventResponseDto removeOrganizer(Long eventId, Long actorUserId, Long removeUserId) {
         Event event = findEventById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found (ID=" + eventId + ")"));
 
@@ -84,11 +88,12 @@ public class EventService {
         event.getOrganizers().remove(toRemove);
         toRemove.getOrganizedEvents().remove(event);
 
-        return eventRepo.save(event);
+        Event updatedEvent = eventRepo.save(event);
+        return Utils.mapEventToResponseDto(updatedEvent);
     }
 
     @Transactional
-    public Event editEvent(Long eventId, Long actorUserId, EventEditDto eventEditDto) {
+    public EventResponseDto editEvent(Long eventId, Long actorUserId, EventEditDto eventEditDto) {
         Event event = findEventById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found (ID=" + eventId + ")"));
 
@@ -103,7 +108,8 @@ public class EventService {
         if (eventEditDto.location() != null)
             event.setLocation(eventEditDto.location());
 
-        return eventRepo.save(event);
+        Event editedEvent = eventRepo.save(event);
+        return Utils.mapEventToResponseDto(editedEvent);
     }
 
     public void cancelEvent(Long eventId, Long actorUserId) {
@@ -115,12 +121,21 @@ public class EventService {
         eventRepo.delete(event);
     }
 
-    public Optional<Event> findEventById(Long eventId) {
-        return eventRepo.findById(eventId);
+    public EventResponseDto getEventById(Long eventId) {
+        Event event = findEventById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Event not found (ID=" + eventId + ")"));
+
+        return Utils.mapEventToResponseDto(event);
     }
 
-    public List<Event> findUpcomingEvents() {
-        return eventRepo.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now());
+    public List<EventResponseDto> findUpcomingEvents() {
+        return eventRepo.findByDateTimeAfterOrderByDateTimeAsc(LocalDateTime.now()).stream()
+                .map(Utils::mapEventToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    private Optional<Event> findEventById(Long eventId) {
+        return eventRepo.findById(eventId);
     }
 
 }

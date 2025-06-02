@@ -1,5 +1,6 @@
 package org.guram.eventscheduler.services;
 
+import org.guram.eventscheduler.DTOs.attendanceDTOs.AttendanceResponseDto;
 import org.guram.eventscheduler.models.Attendance;
 import org.guram.eventscheduler.models.AttendanceStatus;
 import org.guram.eventscheduler.models.Event;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AttendanceService {
@@ -32,7 +34,7 @@ public class AttendanceService {
 
 
     @Transactional
-    public Attendance inviteUser(Long eventId, Long actorUserId, Long inviteeUserId) {
+    public AttendanceResponseDto inviteUser(Long eventId, Long actorUserId, Long inviteeUserId) {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found (ID=" + eventId + ")"));
 
@@ -51,11 +53,12 @@ public class AttendanceService {
         attendance.setEvent(event);
         attendance.setStatus(AttendanceStatus.INVITED);
 
-        return attendanceRepo.save(attendance);
+        Attendance savedAttendance = attendanceRepo.save(attendance);
+        return Utils.mapAttendanceToResponseDto(savedAttendance);
     }
 
     @Transactional
-    public Attendance respondToInvitation(Long eventId, Long inviteeUserId, AttendanceStatus newStatus) {
+    public AttendanceResponseDto respondToInvitation(Long eventId, Long inviteeUserId, AttendanceStatus newStatus) {
         if (newStatus != AttendanceStatus.REGISTERED && newStatus != AttendanceStatus.CANCELLED) {
             throw new IllegalArgumentException("Invalid status. Must be REGISTERED or CANCELLED.");
         }
@@ -75,11 +78,12 @@ public class AttendanceService {
         }
 
         attendance.setStatus(newStatus);
-        return attendanceRepo.save(attendance);
+        Attendance updatedAttendance = attendanceRepo.save(attendance);
+        return Utils.mapAttendanceToResponseDto(updatedAttendance);
     }
 
     @Transactional
-    public Attendance cancelAttendance(Long eventId, Long userId) {
+    public AttendanceResponseDto cancelAttendance(Long eventId, Long userId) {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found (ID=" + eventId + ")"));
 
@@ -90,11 +94,12 @@ public class AttendanceService {
                 .orElseThrow(() -> new IllegalStateException("No attendance record to cancel."));
 
         attendance.setStatus(AttendanceStatus.CANCELLED);
-        return attendanceRepo.save(attendance);
+        Attendance cancelledAttendance = attendanceRepo.save(attendance);
+        return Utils.mapAttendanceToResponseDto(cancelledAttendance);
     }
 
     @Transactional
-    public Attendance markAttended(Long eventId, Long actorUserId, Long attendeeUserId) {
+    public AttendanceResponseDto markAttended(Long eventId, Long actorUserId, Long attendeeUserId) {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found (ID=" + eventId + ")"));
 
@@ -112,18 +117,25 @@ public class AttendanceService {
         }
 
         attendance.setStatus(AttendanceStatus.ATTENDED);
-        return attendanceRepo.save(attendance);
+        Attendance updatedAttendance = attendanceRepo.save(attendance);
+        return Utils.mapAttendanceToResponseDto(updatedAttendance);
     }
 
-    public List<Attendance> listAttendancesByStatus(Long eventId, AttendanceStatus status) {
+    public List<AttendanceResponseDto> listAttendancesByStatus(Long eventId, AttendanceStatus status) {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found (ID=" + eventId + ")"));
-        return attendanceRepo.findByEventAndStatus(event, status);
+
+        return attendanceRepo.findByEventAndStatus(event, status).stream()
+                .map(Utils::mapAttendanceToResponseDto)
+                .collect(Collectors.toList());
     }
 
-    public List<Attendance> listUserRegistrations(Long userId) {
+    public List<AttendanceResponseDto> listUserRegistrations(Long userId) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found (ID=" + userId + ")"));
-        return attendanceRepo.findByUserAndStatus(user, AttendanceStatus.REGISTERED);
+
+        return attendanceRepo.findByUserAndStatus(user, AttendanceStatus.REGISTERED).stream()
+                .map(Utils::mapAttendanceToResponseDto)
+                .collect(Collectors.toList());
     }
 }

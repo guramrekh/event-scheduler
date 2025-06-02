@@ -2,6 +2,7 @@ package org.guram.eventscheduler.services;
 
 import org.guram.eventscheduler.DTOs.userDTOs.UserCreateDto;
 import org.guram.eventscheduler.DTOs.userDTOs.UserResponseDto;
+import org.guram.eventscheduler.DTOs.userDTOs.UserUpdateDto;
 import org.guram.eventscheduler.exceptions.ConflictException;
 import org.guram.eventscheduler.exceptions.UserNotFoundException;
 import org.guram.eventscheduler.models.User;
@@ -50,6 +51,30 @@ public class UserService {
     @Transactional
     public void deleteUser(Long id) {
         userRepo.deleteById(id);
+    }
+
+    @Transactional
+    public UserResponseDto updateUser(Long id, UserUpdateDto userUpdateDto) {
+        User user = findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        if (userUpdateDto.firstName() != null)
+            user.setFirstName(userUpdateDto.firstName());
+        if (userUpdateDto.lastName() != null)
+            user.setLastName(userUpdateDto.lastName());
+        if (userUpdateDto.email() != null && !userUpdateDto.email().equals(user.getEmail())) {
+            userRepo.findByEmail(userUpdateDto.email()).ifPresent(existingUser -> {
+                throw new ConflictException("Email '" + userUpdateDto.email() + "' is already taken by another user.");
+            });
+            user.setEmail(userUpdateDto.email());
+        }
+        if (userUpdateDto.password() != null) {
+            String newPasswordEncoded = passwordEncoder.encode(userUpdateDto.password());
+            user.setPassword(newPasswordEncoded);
+        }
+
+        User updatedUser = userRepo.save(user);
+        return Utils.mapUserToResponseDto(updatedUser);
     }
 
     public List<UserResponseDto> findAllUsers() {

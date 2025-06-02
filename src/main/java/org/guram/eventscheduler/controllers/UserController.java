@@ -3,6 +3,7 @@ package org.guram.eventscheduler.controllers;
 import jakarta.validation.Valid;
 import org.guram.eventscheduler.DTOs.userDTOs.UserCreateDto;
 import org.guram.eventscheduler.DTOs.userDTOs.UserResponseDto;
+import org.guram.eventscheduler.DTOs.userDTOs.UserUpdateDto;
 import org.guram.eventscheduler.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -56,6 +57,14 @@ public class UserController {
         }
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/edit")
+    public ResponseEntity<UserResponseDto> updateUser(
+                        @PathVariable Long id,
+                        @Valid @RequestBody UserUpdateDto userUpdateDto) {
+        UserResponseDto user = userService.updateUser(id, userUpdateDto);
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
 }

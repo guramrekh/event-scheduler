@@ -65,7 +65,7 @@ public class EventController {
                         @RequestParam Long actorUserId,
                         @RequestParam Long newOrgUserId) {
         EventResponseDto event = eventService.addOrganizer(id, actorUserId, newOrgUserId);
-        return new ResponseEntity<>(event, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(event, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}/organizers/{removeUserId}")
@@ -74,6 +74,6 @@ public class EventController {
                         @PathVariable Long removeUserId,
                         @RequestParam Long actorUserId) {
         EventResponseDto event = eventService.removeOrganizer(id, actorUserId, removeUserId);
-        return new ResponseEntity<>(event, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(event, HttpStatus.OK);
     }
 }

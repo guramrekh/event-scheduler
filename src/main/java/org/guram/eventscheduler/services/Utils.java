@@ -3,12 +3,13 @@ package org.guram.eventscheduler.services;
 import org.guram.eventscheduler.DTOs.attendanceDTOs.AttendanceResponseDto;
 import org.guram.eventscheduler.DTOs.eventDTOs.EventResponseDto;
 import org.guram.eventscheduler.DTOs.eventDTOs.EventSummaryDto;
-import org.guram.eventscheduler.DTOs.userDTOs.OrganizerDto;
+import org.guram.eventscheduler.DTOs.invitationDTOs.InvitationResponseDto;
 import org.guram.eventscheduler.DTOs.userDTOs.UserResponseDto;
 import org.guram.eventscheduler.DTOs.userDTOs.UserSummaryDto;
 import org.guram.eventscheduler.exceptions.ForbiddenOperationException;
 import org.guram.eventscheduler.models.Attendance;
 import org.guram.eventscheduler.models.Event;
+import org.guram.eventscheduler.models.Invitation;
 import org.guram.eventscheduler.models.User;
 
 import java.util.Set;
@@ -25,8 +26,8 @@ public class Utils {
     }
 
     public static EventResponseDto mapEventToResponseDto(Event event) {
-        Set<OrganizerDto> organizerDtos = event.getOrganizers().stream()
-                .map(org -> new OrganizerDto(org.getId(), org.getFirstName(), org.getLastName(), org.getEmail()))
+        Set<UserSummaryDto> organizers = event.getOrganizers().stream()
+                .map(org -> new UserSummaryDto(org.getId(), org.getFirstName(), org.getLastName(), org.getEmail()))
                 .collect(Collectors.toSet());
 
         Set<Long> attendanceIds = event.getAttendances().stream()
@@ -39,7 +40,7 @@ public class Utils {
                 event.getDescription(),
                 event.getDateTime(),
                 event.getLocation(),
-                organizerDtos,
+                organizers,
                 attendanceIds
         );
     }
@@ -85,6 +86,41 @@ public class Utils {
                 userSummaryDto,
                 eventSummaryDto,
                 attendance.getStatus()
+        );
+    }
+
+    public static InvitationResponseDto mapInvitationToResponseDto(Invitation invitation) {
+        User invitee = invitation.getInvitee();
+        UserSummaryDto inviteeSummary = new UserSummaryDto(
+                invitee.getId(),
+                invitee.getFirstName(),
+                invitee.getLastName(),
+                invitee.getEmail()
+        );
+
+        User invitor = invitation.getInvitor();
+        UserSummaryDto invitorSummary = new UserSummaryDto(
+                invitor.getId(),
+                invitor.getFirstName(),
+                invitor.getLastName(),
+                invitor.getEmail()
+        );
+
+        Event event = invitation.getEvent();
+        EventSummaryDto eventSummary = new EventSummaryDto(
+                event.getId(),
+                event.getTitle(),
+                event.getDateTime(),
+                event.getLocation()
+        );
+
+        return new InvitationResponseDto(
+                invitation.getId(),
+                inviteeSummary,
+                invitorSummary,
+                eventSummary,
+                invitation.getInvitationSentDate(),
+                invitation.getStatus()
         );
     }
 

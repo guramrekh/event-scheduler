@@ -4,10 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(
-        name = "attendances",
-        uniqueConstraints = @UniqueConstraint(columnNames = { "user_id", "event_id" })
-)
+@Table(name = "attendances",
+        uniqueConstraints = @UniqueConstraint(columnNames = { "user_id", "event_id" }))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,5 +26,5 @@ public class Attendance {
     private Event event;
 
     @Enumerated(EnumType.STRING)
-    private AttendanceStatus status = AttendanceStatus.INVITED;
+    private AttendanceStatus status = AttendanceStatus.REGISTERED;
 }

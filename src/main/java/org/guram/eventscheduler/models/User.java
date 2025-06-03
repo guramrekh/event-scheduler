@@ -13,7 +13,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(exclude = { "password", "organizedEvents", "attendances" })
+@ToString(exclude = { "password", "organizedEvents", "attendances", "sentInvitations", "receivedInvitations" })
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,4 +33,11 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private Set<Attendance> attendances = new HashSet<>();
+
+    @OneToMany(mappedBy = "invitee")
+    private Set<Invitation> receivedInvitations = new HashSet<>();
+
+    @OneToMany(mappedBy = "invitor")
+    private Set<Invitation> sentInvitations = new HashSet<>();
+
 }

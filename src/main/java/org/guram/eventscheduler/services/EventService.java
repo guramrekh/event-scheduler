@@ -84,10 +84,6 @@ public class EventService {
 
         Utils.checkIsOrganizer(removeUserId, event);
 
-        // if both actorUser and removeUser are organizers, at least 2 organizers are present.
-//        if (event.getOrganizers().size() <= 1)
-//            throw new IllegalStateException("Cannot remove only organizer from event (ID=" + eventId + ").");
-
         event.getOrganizers().remove(toRemove);
         toRemove.getOrganizedEvents().remove(event);
 

@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -22,25 +21,6 @@ public class AttendanceController {
         this.attendanceService = attendanceService;
     }
 
-
-    @PostMapping("/invite")
-    public ResponseEntity<AttendanceResponseDto> inviteUser(
-                                @RequestParam Long eventId,
-                                @RequestParam Long actorUserId,
-                                @RequestParam Long inviteeUserId) {
-        AttendanceResponseDto attendance = attendanceService.inviteUser(eventId, actorUserId, inviteeUserId);
-        URI location = URI.create("/attendance/" + attendance.id());
-        return ResponseEntity.created(location).body(attendance);
-    }
-
-    @PutMapping("/respond")
-    public ResponseEntity<AttendanceResponseDto> respondToInvitation(
-                                @RequestParam Long eventId,
-                                @RequestParam Long inviteeUserId,
-                                @RequestParam AttendanceStatus newStatus) {
-        AttendanceResponseDto attendance = attendanceService.respondToInvitation(eventId, inviteeUserId, newStatus);
-        return new ResponseEntity<>(attendance, HttpStatus.OK);
-    }
 
     @PutMapping("/cancel")
     public ResponseEntity<AttendanceResponseDto> cancelAttendance(

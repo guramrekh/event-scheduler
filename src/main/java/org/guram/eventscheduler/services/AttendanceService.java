@@ -38,52 +38,31 @@ public class AttendanceService {
 
 
     @Transactional
-    public AttendanceResponseDto inviteUser(Long eventId, Long actorUserId, Long inviteeUserId) {
-        Event event = eventRepo.findById(eventId)
-                .orElseThrow(() -> new EventNotFoundException(eventId));
-
-        Utils.checkIsOrganizer(actorUserId, event);
-
-        User invitee = userRepo.findById(inviteeUserId)
-                .orElseThrow(() -> new UserNotFoundException(inviteeUserId));
-
-        Optional<Attendance> attendanceOpt = attendanceRepo.findByUserAndEvent(invitee, event);
-        if (attendanceOpt.isPresent()) {
-            throw new ConflictException("User (ID=" + inviteeUserId + ") has an attendance record with status " + attendanceOpt.get().getStatus() + " for this event.");
+    public AttendanceResponseDto registerUser(User user, Event event) {
+        Optional<Attendance> existingAttendance = attendanceRepo.findByUserAndEvent(user, event);
+        if (existingAttendance.isPresent()) {
+            Attendance attendance = existingAttendance.get();
+            if (attendance.getStatus() == AttendanceStatus.REGISTERED) {
+                return Utils.mapAttendanceToResponseDto(attendance);
+            }
+            if (attendance.getStatus() == AttendanceStatus.CANCELLED) {
+                attendance.setStatus(AttendanceStatus.REGISTERED);
+                Attendance updated = attendanceRepo.save(attendance);
+                return Utils.mapAttendanceToResponseDto(updated);
+            }
+            throw new ConflictException("User (ID=" + user.getId() + ") already has an attendance record for event (ID=" + event.getId() + ") with status " + attendance.getStatus() + ".");
         }
 
-        Attendance attendance = new Attendance();
-        attendance.setUser(invitee);
-        attendance.setEvent(event);
-        attendance.setStatus(AttendanceStatus.INVITED);
+        Attendance newAttendance = new Attendance();
+        newAttendance.setUser(user);
+        newAttendance.setEvent(event);
+        newAttendance.setStatus(AttendanceStatus.REGISTERED);
 
-        Attendance savedAttendance = attendanceRepo.save(attendance);
+        user.getAttendances().add(newAttendance);
+        event.getAttendances().add(newAttendance);
+
+        Attendance savedAttendance = attendanceRepo.save(newAttendance);
         return Utils.mapAttendanceToResponseDto(savedAttendance);
-    }
-
-    @Transactional
-    public AttendanceResponseDto respondToInvitation(Long eventId, Long inviteeUserId, AttendanceStatus newStatus) {
-        if (newStatus != AttendanceStatus.REGISTERED && newStatus != AttendanceStatus.CANCELLED) {
-            throw new InvalidStatusTransitionException("Invalid status. Must be REGISTERED or CANCELLED.");
-        }
-
-        Event event = eventRepo.findById(eventId)
-                .orElseThrow(() -> new EventNotFoundException(eventId));
-
-        User invitee = userRepo.findById(inviteeUserId)
-                .orElseThrow(() -> new UserNotFoundException(inviteeUserId));
-
-        Attendance attendance = attendanceRepo.findByUserAndEvent(invitee, event)
-                .orElseThrow(() -> new ConflictException("No pending invitation for this user/event."));
-
-        if (attendance.getStatus() != AttendanceStatus.INVITED) {
-            throw new InvalidStatusTransitionException(
-                    "Invitation already responded to (status=" + attendance.getStatus() + ").");
-        }
-
-        attendance.setStatus(newStatus);
-        Attendance updatedAttendance = attendanceRepo.save(attendance);
-        return Utils.mapAttendanceToResponseDto(updatedAttendance);
     }
 
     @Transactional

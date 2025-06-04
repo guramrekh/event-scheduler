@@ -1,0 +1,12 @@
+package org.guram.eventscheduler.models;
+
+public enum NotificationType {
+    EVENT_INVITATION_RECEIVED,
+    EVENT_CANCELLED,
+    EVENT_DETAILS_UPDATED,
+    INVITATION_ACCEPTED,
+    INVITATION_DECLINED,
+    EVENT_REMINDER,
+    ADDED_AS_ORGANIZER,
+    REMOVED_AS_ORGANIZER
+}

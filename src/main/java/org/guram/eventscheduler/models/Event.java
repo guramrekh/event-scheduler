@@ -1,6 +1,10 @@
 package org.guram.eventscheduler.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -20,9 +24,24 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
+
+    @NotBlank()
+    @Size(min = 3, max = 100)
+    @Column(nullable = false, length = 100)
     private String title;
+
+    @Size(max = 1000)
+    @Column(length = 1000)
     private String description;
+
+    @NotNull()
+    @Future()
+    @Column(nullable = false)
     private LocalDateTime dateTime;
+
+    @NotBlank()
+    @Size(min = 3, max = 100)
+    @Column(length = 100)
     private String location;
 
     @ManyToMany

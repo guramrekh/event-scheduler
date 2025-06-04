@@ -4,7 +4,6 @@ import org.guram.eventscheduler.DTOs.attendanceDTOs.AttendanceResponseDto;
 import org.guram.eventscheduler.models.AttendanceStatus;
 import org.guram.eventscheduler.services.AttendanceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +26,7 @@ public class AttendanceController {
                                 @RequestParam Long eventId,
                                 @RequestParam Long userId) {
         AttendanceResponseDto attendance = attendanceService.cancelAttendance(eventId, userId);
-        return new ResponseEntity<>(attendance, HttpStatus.OK);
+        return ResponseEntity.ok(attendance);
     }
 
     @PutMapping("/mark-attended")
@@ -36,7 +35,7 @@ public class AttendanceController {
                                 @RequestParam Long actorUserId,
                                 @RequestParam Long attendeeUserId) {
         AttendanceResponseDto attendance = attendanceService.markAttended(eventId, actorUserId, attendeeUserId);
-        return new ResponseEntity<>(attendance, HttpStatus.OK);
+        return ResponseEntity.ok(attendance);
     }
 
     @GetMapping("/event/{eventId}")
@@ -44,12 +43,12 @@ public class AttendanceController {
                                 @PathVariable Long eventId,
                                 @RequestParam AttendanceStatus status) {
         List<AttendanceResponseDto> attendances = attendanceService.listAttendancesByStatus(eventId, status);
-        return new ResponseEntity<>(attendances, HttpStatus.OK);
+        return ResponseEntity.ok(attendances);
     }
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<AttendanceResponseDto>> listUserRegistrations(@PathVariable Long userId) {
         List<AttendanceResponseDto> attendances = attendanceService.listUserRegistrations(userId);
-        return new ResponseEntity<>(attendances, HttpStatus.OK);
+        return ResponseEntity.ok(attendances);
     }
 }

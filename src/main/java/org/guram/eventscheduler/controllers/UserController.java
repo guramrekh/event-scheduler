@@ -6,7 +6,6 @@ import org.guram.eventscheduler.DTOs.userDTOs.UserResponseDto;
 import org.guram.eventscheduler.DTOs.userDTOs.UserUpdateDto;
 import org.guram.eventscheduler.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,13 +34,13 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id) {
         UserResponseDto user = userService.findUserById(id);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/email/{email}")
     public ResponseEntity<UserResponseDto> getUserByEmail(@PathVariable String email) {
         UserResponseDto user = userService.findUserByEmail(email);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/all")
@@ -64,7 +63,7 @@ public class UserController {
                         @PathVariable Long id,
                         @Valid @RequestBody UserUpdateDto userUpdateDto) {
         UserResponseDto user = userService.updateUser(id, userUpdateDto);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return ResponseEntity.ok(user);
     }
 
 }

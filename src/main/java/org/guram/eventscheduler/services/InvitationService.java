@@ -2,10 +2,7 @@ package org.guram.eventscheduler.services;
 
 import org.guram.eventscheduler.DTOs.invitationDTOs.InvitationResponseDto;
 import org.guram.eventscheduler.exceptions.*;
-import org.guram.eventscheduler.models.Event;
-import org.guram.eventscheduler.models.Invitation;
-import org.guram.eventscheduler.models.InvitationStatus;
-import org.guram.eventscheduler.models.User;
+import org.guram.eventscheduler.models.*;
 import org.guram.eventscheduler.repositories.EventRepository;
 import org.guram.eventscheduler.repositories.InvitationRepository;
 import org.guram.eventscheduler.repositories.UserRepository;
@@ -24,16 +21,18 @@ public class InvitationService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final AttendanceService attendanceService;
+    private final NotificationService notificationService;
 
     @Autowired
     public InvitationService(InvitationRepository invitationRepository,
                              UserRepository userRepository,
                              EventRepository eventRepository,
-                             AttendanceService attendanceService) {
+                             AttendanceService attendanceService, NotificationService notificationService) {
         this.invitationRepository = invitationRepository;
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
         this.attendanceService = attendanceService;
+        this.notificationService = notificationService;
     }
 
 
@@ -66,6 +65,10 @@ public class InvitationService {
         event.getInvitations().add(newInvitation);
 
         Invitation savedInvitation = invitationRepository.save(newInvitation);
+
+        String message = notificationService.generateInvitationMessage(savedInvitation.getEvent());
+        notificationService.createNotification(savedInvitation.getInvitee(), message, NotificationType.EVENT_INVITATION_RECEIVED);
+
         return Utils.mapInvitationToResponseDto(savedInvitation);
     }
 
@@ -82,12 +85,20 @@ public class InvitationService {
             throw new InvalidStatusTransitionException("Cannot respond to invitation with current status: " + invitation.getStatus() + ". Only PENDING invitations can be responded to.");
         }
 
+        User invitor = invitation.getInvitor();
+        String message = notificationService.generateInvitationResponseMessage(invitation.getInvitee(),
+                invitation.getEvent(), response);
+
         if (response == InvitationStatus.ACCEPTED) {
             invitation.setStatus(InvitationStatus.ACCEPTED);
             attendanceService.registerUser(invitation.getInvitee(), invitation.getEvent());
+            invitation.getEvent().getOrganizers().forEach(organizer ->
+                    notificationService.createNotification(organizer, message, NotificationType.INVITATION_ACCEPTED));
         }
         else if (response == InvitationStatus.DECLINED) {
             invitation.setStatus(InvitationStatus.DECLINED);
+            invitation.getEvent().getOrganizers().forEach(organizer ->
+                    notificationService.createNotification(organizer, message, NotificationType.INVITATION_DECLINED));
         }
         else {
             throw new InvalidStatusTransitionException("Invalid response type. Must be ACCEPTED or DECLINED.");
@@ -100,11 +111,10 @@ public class InvitationService {
     public InvitationResponseDto getInvitationById(Long invitationId) {
         Invitation invitation = invitationRepository.findById(invitationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Invitation", invitationId));
-        // Add authorization here if needed (e.g., only invitor/invitee/organizer can view)
         return Utils.mapInvitationToResponseDto(invitation);
     }
 
-    public List<InvitationResponseDto> listInvitationsSentByUser(Long userId, InvitationStatus status) {
+    public List<InvitationResponseDto> listInvitationsSentByUserByStatus(Long userId, InvitationStatus status) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -113,7 +123,16 @@ public class InvitationService {
                 .collect(Collectors.toList());
     }
 
-    public List<InvitationResponseDto> listInvitationsReceivedByUser(Long userId, InvitationStatus status) {
+    public List<InvitationResponseDto> listAllInvitationsSentByUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        return invitationRepository.findByInvitor(user).stream()
+                .map(Utils::mapInvitationToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<InvitationResponseDto> listInvitationsReceivedByUserByStatus(Long userId, InvitationStatus status) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -122,11 +141,29 @@ public class InvitationService {
                 .collect(Collectors.toList());
     }
 
-    public List<InvitationResponseDto> listInvitationsForEvent(Long eventId, InvitationStatus status) {
+    public List<InvitationResponseDto> listAllInvitationsReceivedByUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        return invitationRepository.findByInvitee(user).stream()
+                .map(Utils::mapInvitationToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<InvitationResponseDto> listInvitationsForEventByStatus(Long eventId, InvitationStatus status) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException(eventId));
 
         return invitationRepository.findByEventAndStatus(event, status).stream()
+                .map(Utils::mapInvitationToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<InvitationResponseDto> listAllInvitationsForAnEvent(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException(eventId));
+
+        return invitationRepository.findByEvent(event).stream()
                 .map(Utils::mapInvitationToResponseDto)
                 .collect(Collectors.toList());
     }

@@ -1,6 +1,9 @@
 package org.guram.eventscheduler.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.HashSet;
@@ -20,12 +23,24 @@ public class User {
     @EqualsAndHashCode.Include
     private Long id;
 
+    @NotBlank()
+    @Size(min = 1, max = 50)
+    @Column(nullable = false, length = 50)
     private String firstName;
+
+    @NotBlank
+    @Size(min = 1, max = 50)
+    @Column(nullable = false, length = 50)
     private String lastName;
 
-    @Column(unique = true, nullable = false)
+    @Email
+    @NotBlank
+    @Size(max = 100)
+    @Column(unique = true, nullable = false, length = 100)
     private String email;
 
+    @NotBlank
+    @Column(nullable = false)
     private String password;
 
     @ManyToMany(mappedBy = "organizers")

@@ -4,7 +4,6 @@ import org.guram.eventscheduler.DTOs.invitationDTOs.InvitationResponseDto;
 import org.guram.eventscheduler.models.InvitationStatus;
 import org.guram.eventscheduler.services.InvitationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,36 +36,49 @@ public class InvitationController {
                                                                      @RequestParam Long inviteeId,
                                                                      @RequestParam InvitationStatus newStatus) {
         InvitationResponseDto invitation = invitationService.respondToInvitation(invitationId, inviteeId, newStatus);
-        return new ResponseEntity<>(invitation, HttpStatus.OK);
+        return ResponseEntity.ok(invitation);
     }
 
-    @GetMapping("/{eventId}")
+    @GetMapping("/event/{eventId}")
     public ResponseEntity<List<InvitationResponseDto>> listAllInvitationsForEvent(@PathVariable Long eventId,
                                                 @RequestParam(required = false) InvitationStatus status) {
-        List<InvitationResponseDto> invitations = invitationService.listInvitationsForEvent(eventId, status);
-        return new ResponseEntity<>(invitations, HttpStatus.OK);
+        List<InvitationResponseDto> invitations;
+        if (status != null)
+            invitations = invitationService.listInvitationsForEventByStatus(eventId, status);
+        else
+            invitations = invitationService.listAllInvitationsForAnEvent(eventId);
+
+        return ResponseEntity.ok(invitations);
     }
 
     @GetMapping("/user/{userId}/sent")
-    public ResponseEntity<List<InvitationResponseDto>> listInvitationsSentByUser(
-            @PathVariable Long userId,
-            @RequestParam(required = false) InvitationStatus status) {
-        List<InvitationResponseDto> invitations = invitationService.listInvitationsSentByUser(userId, status);
-        return new ResponseEntity<>(invitations, HttpStatus.OK);
+    public ResponseEntity<List<InvitationResponseDto>> listInvitationsSentByUser(@PathVariable Long userId,
+                                                        @RequestParam(required = false) InvitationStatus status) {
+        List<InvitationResponseDto> invitations;
+        if (status != null)
+            invitations = invitationService.listInvitationsSentByUserByStatus(userId, status);
+        else
+            invitations = invitationService.listAllInvitationsSentByUser(userId);
+
+        return ResponseEntity.ok(invitations);
     }
 
     @GetMapping("/user/{userId}/received")
-    public ResponseEntity<List<InvitationResponseDto>> listInvitationsReceivedByUser(
-            @PathVariable Long userId,
-            @RequestParam(required = false) InvitationStatus status) {
-        List<InvitationResponseDto> invitations = invitationService.listInvitationsReceivedByUser(userId, status);
-        return new ResponseEntity<>(invitations, HttpStatus.OK);
+    public ResponseEntity<List<InvitationResponseDto>> listInvitationsReceivedByUser(@PathVariable Long userId,
+                                                        @RequestParam(required = false) InvitationStatus status) {
+        List<InvitationResponseDto> invitations;
+        if (status != null)
+            invitations = invitationService.listInvitationsReceivedByUserByStatus(userId, status);
+        else
+            invitations = invitationService.listAllInvitationsReceivedByUser(userId);
+
+        return ResponseEntity.ok(invitations);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<InvitationResponseDto> getInvitationById(@PathVariable Long id) {
         InvitationResponseDto invitation = invitationService.getInvitationById(id);
-        return new ResponseEntity<>(invitation, HttpStatus.OK);
+        return ResponseEntity.ok(invitation);
     }
 
 }

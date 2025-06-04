@@ -4,13 +4,11 @@ import org.guram.eventscheduler.DTOs.attendanceDTOs.AttendanceResponseDto;
 import org.guram.eventscheduler.DTOs.eventDTOs.EventResponseDto;
 import org.guram.eventscheduler.DTOs.eventDTOs.EventSummaryDto;
 import org.guram.eventscheduler.DTOs.invitationDTOs.InvitationResponseDto;
+import org.guram.eventscheduler.DTOs.notificationDTOs.NotificationResponseDto;
 import org.guram.eventscheduler.DTOs.userDTOs.UserResponseDto;
 import org.guram.eventscheduler.DTOs.userDTOs.UserSummaryDto;
 import org.guram.eventscheduler.exceptions.ForbiddenOperationException;
-import org.guram.eventscheduler.models.Attendance;
-import org.guram.eventscheduler.models.Event;
-import org.guram.eventscheduler.models.Invitation;
-import org.guram.eventscheduler.models.User;
+import org.guram.eventscheduler.models.*;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -121,6 +119,24 @@ public class Utils {
                 eventSummary,
                 invitation.getInvitationSentDate(),
                 invitation.getStatus()
+        );
+    }
+
+    public static NotificationResponseDto mapNotificationToResponseDto(Notification notification) {
+        User recipient = notification.getRecipient();
+        UserSummaryDto recipientSummary = new UserSummaryDto(
+                recipient.getId(),
+                recipient.getFirstName(),
+                recipient.getLastName(),
+                recipient.getEmail()
+        );
+
+        return new NotificationResponseDto(
+                notification.getId(),
+                recipientSummary,
+                notification.getMessage(),
+                notification.getType(),
+                notification.getCreatedAt()
         );
     }
 

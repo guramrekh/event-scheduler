@@ -14,4 +14,8 @@ public interface InvitationRepository extends JpaRepository<Invitation, Long> {
     List<Invitation> findByInvitorAndStatus(User invitor, InvitationStatus status);
     List<Invitation> findByInviteeAndStatus(User invitee, InvitationStatus status);
     List<Invitation> findByEventAndStatus(Event event, InvitationStatus status);
+    List<Invitation> findByEvent(Event event);
+    List<Invitation> findByInvitor(User invitor);
+    List<Invitation> findByInvitee(User invitee);
+
 }

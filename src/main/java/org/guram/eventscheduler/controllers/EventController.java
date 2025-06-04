@@ -6,7 +6,6 @@ import org.guram.eventscheduler.DTOs.eventDTOs.EventEditDto;
 import org.guram.eventscheduler.DTOs.eventDTOs.EventResponseDto;
 import org.guram.eventscheduler.services.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,13 +34,13 @@ public class EventController {
     @GetMapping("/{id}")
     public ResponseEntity<EventResponseDto> getEventById(@PathVariable Long id) {
         EventResponseDto event = eventService.getEventById(id);
-        return new ResponseEntity<>(event, HttpStatus.OK);
+        return ResponseEntity.ok(event);
     }
 
     @GetMapping("/upcoming")
     public ResponseEntity<List<EventResponseDto>> listUpcomingEvents() {
         List<EventResponseDto> upcomingEvents = eventService.findUpcomingEvents();
-        return new ResponseEntity<>(upcomingEvents, HttpStatus.OK);
+        return ResponseEntity.ok(upcomingEvents);
     }
 
     @PutMapping("/{id}/edit")
@@ -50,7 +49,7 @@ public class EventController {
                         @RequestParam Long actorUserId,
                         @Valid @RequestBody EventEditDto eventEditDto) {
         EventResponseDto event = eventService.editEvent(id, actorUserId, eventEditDto);
-        return new ResponseEntity<>(event, HttpStatus.OK);
+        return ResponseEntity.ok(event);
     }
 
     @DeleteMapping("/{id}/cancel")
@@ -65,7 +64,7 @@ public class EventController {
                         @RequestParam Long actorUserId,
                         @RequestParam Long newOrgUserId) {
         EventResponseDto event = eventService.addOrganizer(id, actorUserId, newOrgUserId);
-        return new ResponseEntity<>(event, HttpStatus.OK);
+        return ResponseEntity.ok(event);
     }
 
     @DeleteMapping("/{id}/organizers/{removeUserId}")
@@ -74,6 +73,6 @@ public class EventController {
                         @PathVariable Long removeUserId,
                         @RequestParam Long actorUserId) {
         EventResponseDto event = eventService.removeOrganizer(id, actorUserId, removeUserId);
-        return new ResponseEntity<>(event, HttpStatus.OK);
+        return ResponseEntity.ok(event);
     }
 }

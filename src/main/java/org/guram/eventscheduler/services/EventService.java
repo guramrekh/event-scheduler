@@ -5,8 +5,8 @@ import org.guram.eventscheduler.DTOs.eventDTOs.EventEditDto;
 import org.guram.eventscheduler.DTOs.eventDTOs.EventResponseDto;
 import org.guram.eventscheduler.exceptions.EventNotFoundException;
 import org.guram.eventscheduler.exceptions.UserNotFoundException;
-import org.guram.eventscheduler.models.Event;
-import org.guram.eventscheduler.models.User;
+import org.guram.eventscheduler.models.*;
+import org.guram.eventscheduler.repositories.AttendanceRepository;
 import org.guram.eventscheduler.repositories.EventRepository;
 import org.guram.eventscheduler.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +23,15 @@ public class EventService {
 
     private final EventRepository eventRepo;
     private final UserRepository userRepo;
+    private final AttendanceRepository attendanceRepo;
+    private final NotificationService notificationService;
 
     @Autowired
-    public EventService(EventRepository eventRepo, UserRepository userRepo) {
+    public EventService(EventRepository eventRepo, UserRepository userRepo, AttendanceRepository attendanceRepo, NotificationService notificationService) {
         this.eventRepo = eventRepo;
         this.userRepo = userRepo;
+        this.attendanceRepo = attendanceRepo;
+        this.notificationService = notificationService;
     }
 
 
@@ -69,6 +73,11 @@ public class EventService {
         toAdd.getOrganizedEvents().add(event);
 
         Event updatedEvent = eventRepo.save(event);
+
+        User actor = userRepo.findById(actorUserId).orElseThrow(() -> new UserNotFoundException(actorUserId));
+        String message = notificationService.generateAddedAsOrganizerMessage(actor, event);
+        notificationService.createNotification(toAdd, message, NotificationType.ADDED_AS_ORGANIZER);
+
         return Utils.mapEventToResponseDto(updatedEvent);
     }
 
@@ -88,6 +97,11 @@ public class EventService {
         toRemove.getOrganizedEvents().remove(event);
 
         Event updatedEvent = eventRepo.save(event);
+
+        User actor = userRepo.findById(actorUserId).orElseThrow(() -> new UserNotFoundException(actorUserId));
+        String message = notificationService.generateRemovedAsOrganizerMessage(actor, event);
+        notificationService.createNotification(toRemove, message, NotificationType.REMOVED_AS_ORGANIZER);
+
         return Utils.mapEventToResponseDto(updatedEvent);
     }
 
@@ -108,6 +122,19 @@ public class EventService {
             event.setLocation(eventEditDto.location());
 
         Event editedEvent = eventRepo.save(event);
+
+        String message = notificationService.generateEventUpdatedMessage(editedEvent);
+        attendanceRepo.findByEventAndStatus(editedEvent, AttendanceStatus.REGISTERED).stream()
+                .map(Attendance::getUser)
+                .distinct()
+                .forEach(user -> notificationService.createNotification(user, message, NotificationType.EVENT_DETAILS_UPDATED));
+
+        editedEvent.getInvitations().stream()
+                .filter(inv -> inv.getStatus() == InvitationStatus.PENDING)
+                .map(Invitation::getInvitee)
+                .distinct()
+                .forEach(user -> notificationService.createNotification(user, message, NotificationType.EVENT_DETAILS_UPDATED));
+
         return Utils.mapEventToResponseDto(editedEvent);
     }
 
@@ -120,6 +147,18 @@ public class EventService {
 
         event.getOrganizers().forEach(organizer -> organizer.getOrganizedEvents().remove(event));
         event.getOrganizers().clear();
+
+        String message = notificationService.generateEventCancelledMessage(event);
+        attendanceRepo.findByEventAndStatus(event, AttendanceStatus.REGISTERED).stream()
+                .map(Attendance::getUser)
+                .distinct()
+                .forEach(user -> notificationService.createNotification(user, message, NotificationType.EVENT_CANCELLED));
+
+        event.getInvitations().stream()
+                .filter(inv -> inv.getStatus() == InvitationStatus.PENDING)
+                .map(Invitation::getInvitee)
+                .distinct()
+                .forEach(user -> notificationService.createNotification(user, message, NotificationType.EVENT_CANCELLED));
 
         eventRepo.delete(event);
     }

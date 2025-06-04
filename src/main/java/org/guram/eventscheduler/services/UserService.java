@@ -62,12 +62,6 @@ public class UserService {
             user.setFirstName(userUpdateDto.firstName());
         if (userUpdateDto.lastName() != null)
             user.setLastName(userUpdateDto.lastName());
-        if (userUpdateDto.email() != null && !userUpdateDto.email().equals(user.getEmail())) {
-            userRepo.findByEmail(userUpdateDto.email()).ifPresent(existingUser -> {
-                throw new ConflictException("Email '" + userUpdateDto.email() + "' is already taken by another user.");
-            });
-            user.setEmail(userUpdateDto.email());
-        }
         if (userUpdateDto.password() != null) {
             String newPasswordEncoded = passwordEncoder.encode(userUpdateDto.password());
             user.setPassword(newPasswordEncoded);

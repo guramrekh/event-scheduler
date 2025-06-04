@@ -1,26 +1,33 @@
 package org.guram.eventscheduler.controllers;
 
 import jakarta.validation.Valid;
-import org.guram.eventscheduler.DTOs.eventDTOs.EventCreateDto;
-import org.guram.eventscheduler.DTOs.eventDTOs.EventEditDto;
-import org.guram.eventscheduler.DTOs.eventDTOs.EventResponseDto;
+import org.guram.eventscheduler.dtos.eventDtos.EventCreateDto;
+import org.guram.eventscheduler.dtos.eventDtos.EventEditDto;
+import org.guram.eventscheduler.dtos.eventDtos.EventResponseDto;
 import org.guram.eventscheduler.services.EventService;
+import org.guram.eventscheduler.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+
+import static org.guram.eventscheduler.controllers.Utils.getCurrentUser;
 
 @RestController
 @RequestMapping("/event")
 public class EventController {
 
     private final EventService eventService;
+    private final UserService userService;
 
     @Autowired
-    public EventController(EventService eventService) {
+    public EventController(EventService eventService, UserService userService) {
         this.eventService = eventService;
+        this.userService = userService;
     }
 
 
@@ -46,33 +53,38 @@ public class EventController {
     @PutMapping("/{id}/edit")
     public ResponseEntity<EventResponseDto> editEvent(
                         @PathVariable Long id,
-                        @RequestParam Long actorUserId,
+                        @AuthenticationPrincipal UserDetails userDetails,
                         @Valid @RequestBody EventEditDto eventEditDto) {
-        EventResponseDto event = eventService.editEvent(id, actorUserId, eventEditDto);
+        Long currentUserId = getCurrentUser(userDetails, userService).getId();
+        EventResponseDto event = eventService.editEvent(id, currentUserId, eventEditDto);
         return ResponseEntity.ok(event);
     }
 
-    @DeleteMapping("/{id}/cancel")
-    public ResponseEntity<Void> cancelEvent(@PathVariable Long id, @RequestParam Long actorUserId) {
-        eventService.cancelEvent(id, actorUserId);
+    @DeleteMapping("/{eventId}/cancel")
+    public ResponseEntity<Void> cancelEvent(@PathVariable Long eventId,
+                                            @AuthenticationPrincipal UserDetails userDetails) {
+        Long currentUserId = getCurrentUser(userDetails, userService).getId();
+        eventService.cancelEvent(eventId, currentUserId);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}/organizers")
+    @PostMapping("/{eventId}/organizers/add")
     public ResponseEntity<EventResponseDto> addOrganizer(
-                        @PathVariable Long id,
-                        @RequestParam Long actorUserId,
-                        @RequestParam Long newOrgUserId) {
-        EventResponseDto event = eventService.addOrganizer(id, actorUserId, newOrgUserId);
+                                    @PathVariable Long eventId,
+                                    @RequestParam Long newOrgUserId,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        Long currentUserID = getCurrentUser(userDetails, userService).getId();
+        EventResponseDto event = eventService.addOrganizer(eventId, currentUserID, newOrgUserId);
         return ResponseEntity.ok(event);
     }
 
-    @DeleteMapping("/{id}/organizers/{removeUserId}")
+    @DeleteMapping("/{eventId}/organizers/remove")
     public ResponseEntity<EventResponseDto> removeOrganizer(
-                        @PathVariable Long id,
-                        @PathVariable Long removeUserId,
-                        @RequestParam Long actorUserId) {
-        EventResponseDto event = eventService.removeOrganizer(id, actorUserId, removeUserId);
+                                    @PathVariable Long eventId,
+                                    @RequestParam Long removeUserId,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        Long currentUserId = getCurrentUser(userDetails, userService).getId();
+        EventResponseDto event = eventService.removeOrganizer(eventId, currentUserId, removeUserId);
         return ResponseEntity.ok(event);
     }
 }

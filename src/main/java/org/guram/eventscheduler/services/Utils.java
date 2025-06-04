@@ -1,12 +1,12 @@
 package org.guram.eventscheduler.services;
 
-import org.guram.eventscheduler.DTOs.attendanceDTOs.AttendanceResponseDto;
-import org.guram.eventscheduler.DTOs.eventDTOs.EventResponseDto;
-import org.guram.eventscheduler.DTOs.eventDTOs.EventSummaryDto;
-import org.guram.eventscheduler.DTOs.invitationDTOs.InvitationResponseDto;
-import org.guram.eventscheduler.DTOs.notificationDTOs.NotificationResponseDto;
-import org.guram.eventscheduler.DTOs.userDTOs.UserResponseDto;
-import org.guram.eventscheduler.DTOs.userDTOs.UserSummaryDto;
+import org.guram.eventscheduler.dtos.attendanceDtos.AttendanceResponseDto;
+import org.guram.eventscheduler.dtos.eventDtos.EventResponseDto;
+import org.guram.eventscheduler.dtos.eventDtos.EventSummaryDto;
+import org.guram.eventscheduler.dtos.invitationDtos.InvitationResponseDto;
+import org.guram.eventscheduler.dtos.notificationDtos.NotificationResponseDto;
+import org.guram.eventscheduler.dtos.userDtos.UserResponseDto;
+import org.guram.eventscheduler.dtos.userDtos.UserSummaryDto;
 import org.guram.eventscheduler.exceptions.ForbiddenOperationException;
 import org.guram.eventscheduler.models.*;
 

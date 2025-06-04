@@ -1,8 +1,8 @@
-package org.guram.eventscheduler.DTOs.attendanceDTOs;
+package org.guram.eventscheduler.dtos.attendanceDtos;
 
 import jakarta.validation.constraints.NotNull;
-import org.guram.eventscheduler.DTOs.eventDTOs.EventSummaryDto;
-import org.guram.eventscheduler.DTOs.userDTOs.UserSummaryDto;
+import org.guram.eventscheduler.dtos.eventDtos.EventSummaryDto;
+import org.guram.eventscheduler.dtos.userDtos.UserSummaryDto;
 import org.guram.eventscheduler.models.AttendanceStatus;
 
 public record AttendanceResponseDto(

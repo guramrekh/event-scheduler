@@ -1,8 +1,8 @@
-package org.guram.eventscheduler.DTOs.invitationDTOs;
+package org.guram.eventscheduler.dtos.invitationDtos;
 
 import jakarta.validation.constraints.NotNull;
-import org.guram.eventscheduler.DTOs.eventDTOs.EventSummaryDto;
-import org.guram.eventscheduler.DTOs.userDTOs.UserSummaryDto;
+import org.guram.eventscheduler.dtos.eventDtos.EventSummaryDto;
+import org.guram.eventscheduler.dtos.userDtos.UserSummaryDto;
 import org.guram.eventscheduler.models.InvitationStatus;
 
 import java.time.LocalDateTime;

@@ -1,10 +1,13 @@
-package org.guram.eventscheduler.DTOs.eventDTOs;
+package org.guram.eventscheduler.dtos.eventDtos;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
-public record EventEditDto(
+public record EventCreateDto(
         @NotBlank(message = "Title is mandatory")
         @Size(min = 3, max = 100, message = "Event title must be between 3 and 100 characters")
         String title,
@@ -18,5 +21,8 @@ public record EventEditDto(
 
         @NotBlank(message = "Location is mandatory")
         @Size(min = 3, max = 100, message = "Event location must be between 3 and 100 characters")
-        String location
+        String location,
+
+        @NotNull(message = "Organizer user ID is mandatory")
+        Long organizerUserId
 ) {}

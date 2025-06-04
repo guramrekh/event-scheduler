@@ -1,4 +1,4 @@
-package org.guram.eventscheduler.DTOs.eventDTOs;
+package org.guram.eventscheduler.dtos.eventDtos;
 
 import jakarta.validation.constraints.NotNull;
 

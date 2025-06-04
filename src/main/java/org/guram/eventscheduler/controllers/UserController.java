@@ -1,16 +1,20 @@
 package org.guram.eventscheduler.controllers;
 
 import jakarta.validation.Valid;
-import org.guram.eventscheduler.DTOs.userDTOs.UserCreateDto;
-import org.guram.eventscheduler.DTOs.userDTOs.UserResponseDto;
-import org.guram.eventscheduler.DTOs.userDTOs.UserUpdateDto;
+import org.guram.eventscheduler.dtos.userDtos.UserCreateDto;
+import org.guram.eventscheduler.dtos.userDtos.UserResponseDto;
+import org.guram.eventscheduler.dtos.userDtos.UserUpdateDto;
 import org.guram.eventscheduler.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+
+import static org.guram.eventscheduler.controllers.Utils.getCurrentUser;
 
 @RestController
 @RequestMapping("/user")
@@ -24,8 +28,8 @@ public class UserController {
     }
 
 
-    @PostMapping("/create")
-    public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserCreateDto user) {
+    @PostMapping("/register")
+    public ResponseEntity<UserResponseDto> registerUser(@Valid @RequestBody UserCreateDto user) {
         UserResponseDto newUser = userService.createUser(user);
         URI location = URI.create("/user/" + newUser.id());
         return ResponseEntity.created(location).body(newUser);
@@ -49,20 +53,19 @@ public class UserController {
         return ResponseEntity.ok(all);
     }
 
-    @DeleteMapping("/{id}/delete")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        if (userService.findUserById(id) == null) {
-            return ResponseEntity.notFound().build();
-        }
-        userService.deleteUser(id);
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = getCurrentUser(userDetails, userService).getId();
+        userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}/edit")
+    @PutMapping("/edit")
     public ResponseEntity<UserResponseDto> updateUser(
-                        @PathVariable Long id,
+                        @AuthenticationPrincipal UserDetails userDetails,
                         @Valid @RequestBody UserUpdateDto userUpdateDto) {
-        UserResponseDto user = userService.updateUser(id, userUpdateDto);
+        Long userId = getCurrentUser(userDetails, userService).getId();
+        UserResponseDto user = userService.updateUser(userId, userUpdateDto);
         return ResponseEntity.ok(user);
     }
 

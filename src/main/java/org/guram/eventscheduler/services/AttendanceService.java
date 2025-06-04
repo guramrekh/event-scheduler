@@ -1,6 +1,6 @@
 package org.guram.eventscheduler.services;
 
-import org.guram.eventscheduler.DTOs.attendanceDTOs.AttendanceResponseDto;
+import org.guram.eventscheduler.dtos.attendanceDtos.AttendanceResponseDto;
 import org.guram.eventscheduler.exceptions.ConflictException;
 import org.guram.eventscheduler.exceptions.EventNotFoundException;
 import org.guram.eventscheduler.exceptions.InvalidStatusTransitionException;

@@ -1,41 +1,51 @@
 package org.guram.eventscheduler.controllers;
 
-import org.guram.eventscheduler.DTOs.invitationDTOs.InvitationResponseDto;
+import org.guram.eventscheduler.dtos.invitationDtos.InvitationResponseDto;
 import org.guram.eventscheduler.models.InvitationStatus;
 import org.guram.eventscheduler.services.InvitationService;
+import org.guram.eventscheduler.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+
+import static org.guram.eventscheduler.controllers.Utils.getCurrentUser;
 
 @RestController
 @RequestMapping("/invitation")
 public class InvitationController {
 
     private final InvitationService invitationService;
+    private final UserService userService;
 
     @Autowired
-    public InvitationController(InvitationService invitationService) {
+    public InvitationController(InvitationService invitationService, UserService userService) {
         this.invitationService = invitationService;
+        this.userService = userService;
     }
 
 
     @PostMapping("/invite")
     public ResponseEntity<InvitationResponseDto> inviteUser(@RequestParam Long eventId,
-                                                            @RequestParam Long invitorId,
-                                                            @RequestParam Long inviteeId) {
-        InvitationResponseDto invitation = invitationService.sendInvitation(invitorId, inviteeId, eventId);
+                                                    @RequestParam Long inviteeId,
+                                                    @AuthenticationPrincipal UserDetails userDetails) {
+        Long currentUserId = getCurrentUser(userDetails, userService).getId();
+        InvitationResponseDto invitation = invitationService.sendInvitation(currentUserId, inviteeId, eventId);
         URI location = URI.create("/invitation/" + invitation.id());
         return ResponseEntity.created(location).body(invitation);
     }
 
-    @PutMapping("/respond")
-    public ResponseEntity<InvitationResponseDto> respondToInvitation(@RequestParam Long invitationId,
-                                                                     @RequestParam Long inviteeId,
-                                                                     @RequestParam InvitationStatus newStatus) {
-        InvitationResponseDto invitation = invitationService.respondToInvitation(invitationId, inviteeId, newStatus);
+    @PutMapping("/{invitationId}/respond")
+    public ResponseEntity<InvitationResponseDto> respondToInvitation(@PathVariable Long invitationId,
+                                                     @RequestParam InvitationStatus newStatus,
+                                                     @AuthenticationPrincipal UserDetails userDetails) {
+        Long currentUserId = getCurrentUser(userDetails, userService).getId();
+        InvitationResponseDto invitation = invitationService.respondToInvitation(
+                invitationId, currentUserId, newStatus);
         return ResponseEntity.ok(invitation);
     }
 
@@ -51,26 +61,30 @@ public class InvitationController {
         return ResponseEntity.ok(invitations);
     }
 
-    @GetMapping("/user/{userId}/sent")
-    public ResponseEntity<List<InvitationResponseDto>> listInvitationsSentByUser(@PathVariable Long userId,
-                                                        @RequestParam(required = false) InvitationStatus status) {
+    @GetMapping("/sent")
+    public ResponseEntity<List<InvitationResponseDto>> listInvitationsSentByUser(
+                                            @AuthenticationPrincipal UserDetails userDetails,
+                                            @RequestParam(required = false) InvitationStatus status) {
+        Long currentUserId = getCurrentUser(userDetails, userService).getId();
         List<InvitationResponseDto> invitations;
         if (status != null)
-            invitations = invitationService.listInvitationsSentByUserByStatus(userId, status);
+            invitations = invitationService.listInvitationsSentByUserByStatus(currentUserId, status);
         else
-            invitations = invitationService.listAllInvitationsSentByUser(userId);
+            invitations = invitationService.listAllInvitationsSentByUser(currentUserId);
 
         return ResponseEntity.ok(invitations);
     }
 
-    @GetMapping("/user/{userId}/received")
-    public ResponseEntity<List<InvitationResponseDto>> listInvitationsReceivedByUser(@PathVariable Long userId,
-                                                        @RequestParam(required = false) InvitationStatus status) {
+    @GetMapping("/received")
+    public ResponseEntity<List<InvitationResponseDto>> listInvitationsReceivedByUser(
+                                            @AuthenticationPrincipal UserDetails userDetails,
+                                            @RequestParam(required = false) InvitationStatus status) {
+        Long currentUserId = getCurrentUser(userDetails, userService).getId();
         List<InvitationResponseDto> invitations;
         if (status != null)
-            invitations = invitationService.listInvitationsReceivedByUserByStatus(userId, status);
+            invitations = invitationService.listInvitationsReceivedByUserByStatus(currentUserId, status);
         else
-            invitations = invitationService.listAllInvitationsReceivedByUser(userId);
+            invitations = invitationService.listAllInvitationsReceivedByUser(currentUserId);
 
         return ResponseEntity.ok(invitations);
     }

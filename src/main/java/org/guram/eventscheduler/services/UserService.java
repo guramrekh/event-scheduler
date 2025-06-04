@@ -1,8 +1,8 @@
 package org.guram.eventscheduler.services;
 
-import org.guram.eventscheduler.DTOs.userDTOs.UserCreateDto;
-import org.guram.eventscheduler.DTOs.userDTOs.UserResponseDto;
-import org.guram.eventscheduler.DTOs.userDTOs.UserUpdateDto;
+import org.guram.eventscheduler.dtos.userDtos.UserCreateDto;
+import org.guram.eventscheduler.dtos.userDtos.UserResponseDto;
+import org.guram.eventscheduler.dtos.userDtos.UserUpdateDto;
 import org.guram.eventscheduler.exceptions.ConflictException;
 import org.guram.eventscheduler.exceptions.UserNotFoundException;
 import org.guram.eventscheduler.models.User;
@@ -90,10 +90,10 @@ public class UserService {
     }
 
 
-    private Optional<User> findById(Long id) {
+    public Optional<User> findById(Long id) {
         return userRepo.findById(id);
     }
-    private Optional<User> findByEmail(String email) {
+    public Optional<User> findByEmail(String email) {
         return userRepo.findByEmail(email);
     }
 

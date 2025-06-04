@@ -1,6 +1,6 @@
 package org.guram.eventscheduler.services;
 
-import org.guram.eventscheduler.DTOs.notificationDTOs.NotificationResponseDto;
+import org.guram.eventscheduler.dtos.notificationDtos.NotificationResponseDto;
 import org.guram.eventscheduler.exceptions.UserNotFoundException;
 import org.guram.eventscheduler.models.*;
 import org.guram.eventscheduler.repositories.NotificationRepository;

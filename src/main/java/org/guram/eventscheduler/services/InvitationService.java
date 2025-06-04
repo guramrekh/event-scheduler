@@ -1,6 +1,6 @@
 package org.guram.eventscheduler.services;
 
-import org.guram.eventscheduler.DTOs.invitationDTOs.InvitationResponseDto;
+import org.guram.eventscheduler.dtos.invitationDtos.InvitationResponseDto;
 import org.guram.eventscheduler.exceptions.*;
 import org.guram.eventscheduler.models.*;
 import org.guram.eventscheduler.repositories.EventRepository;

@@ -1,7 +1,7 @@
-package org.guram.eventscheduler.DTOs.notificationDTOs;
+package org.guram.eventscheduler.dtos.notificationDtos;
 
 import jakarta.validation.constraints.NotNull;
-import org.guram.eventscheduler.DTOs.userDTOs.UserSummaryDto;
+import org.guram.eventscheduler.dtos.userDtos.UserSummaryDto;
 import org.guram.eventscheduler.models.NotificationType;
 
 import java.time.LocalDateTime;

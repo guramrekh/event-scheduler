@@ -1,8 +1,8 @@
 package org.guram.eventscheduler.services;
 
-import org.guram.eventscheduler.DTOs.eventDTOs.EventCreateDto;
-import org.guram.eventscheduler.DTOs.eventDTOs.EventEditDto;
-import org.guram.eventscheduler.DTOs.eventDTOs.EventResponseDto;
+import org.guram.eventscheduler.dtos.eventDtos.EventCreateDto;
+import org.guram.eventscheduler.dtos.eventDtos.EventEditDto;
+import org.guram.eventscheduler.dtos.eventDtos.EventResponseDto;
 import org.guram.eventscheduler.exceptions.EventNotFoundException;
 import org.guram.eventscheduler.exceptions.UserNotFoundException;
 import org.guram.eventscheduler.models.*;

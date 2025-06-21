@@ -10,27 +10,47 @@ import org.guram.eventscheduler.dtos.userDtos.UserSummaryDto;
 import org.guram.eventscheduler.exceptions.ForbiddenOperationException;
 import org.guram.eventscheduler.models.*;
 
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Utils {
 
     public static void checkIsOrganizer(Long actorUserId, Event event) {
-        boolean actorIsOrganizer = event.getOrganizers().stream()
-                .anyMatch(u -> u.getId().equals(actorUserId));
+        boolean actorIsOrganizer = event.getAttendances().stream()
+                .filter(att -> att.getRole() == AttendanceRole.ORGANIZER)
+                .anyMatch(att -> att.getUser().getId().equals(actorUserId));
+
         if (!actorIsOrganizer) {
             throw new ForbiddenOperationException("User (ID=" + actorUserId + ") is not an organizer for this event.");
         }
     }
 
     public static EventResponseDto mapEventToResponseDto(Event event) {
-        Set<UserSummaryDto> organizers = event.getOrganizers().stream()
-                .map(org -> new UserSummaryDto(org.getId(), org.getFirstName(), org.getLastName(), org.getEmail()))
-                .collect(Collectors.toSet());
+        var everyAttendance = event.getAttendances();
 
-        Set<Long> attendanceIds = event.getAttendances().stream()
-                .map(Attendance::getId)
-                .collect(Collectors.toSet());
+        List<UserSummaryDto> attendees = everyAttendance.stream()
+                .filter(att -> att.getRole() == AttendanceRole.ATTENDEE &&
+                        (att.getStatus() == AttendanceStatus.REGISTERED || att.getStatus() == AttendanceStatus.ATTENDED))
+                .map(Attendance::getUser)
+                .map(user -> new UserSummaryDto(
+                        user.getId(), user.getFirstName(), user.getLastName(), user.getEmail()
+                ))
+                .toList();
+
+        List<UserSummaryDto> organizers = everyAttendance.stream()
+                .filter(att -> att.getRole() == AttendanceRole.ORGANIZER &&
+                        (att.getStatus() == AttendanceStatus.REGISTERED || att.getStatus() == AttendanceStatus.ATTENDED))
+                .map(Attendance::getUser)
+                .map(user -> new UserSummaryDto(
+                        user.getId(), user.getFirstName(), user.getLastName(), user.getEmail()
+                ))
+                .toList();
+
+        Map<Long, AttendanceStatus> userAttendanceStatusMap = everyAttendance.stream()
+                .filter(att -> att.getStatus() == AttendanceStatus.REGISTERED ||
+                        att.getStatus() == AttendanceStatus.ATTENDED)
+                .collect(Collectors.toMap(att -> att.getUser().getId(), Attendance::getStatus));
 
         return new EventResponseDto(
                 event.getId(),
@@ -38,27 +58,19 @@ public class Utils {
                 event.getDescription(),
                 event.getDateTime(),
                 event.getLocation(),
+                event.isCancelled(),
+                attendees,
                 organizers,
-                attendanceIds
+                userAttendanceStatusMap
         );
     }
 
     public static UserResponseDto mapUserToResponseDto(User user) {
-        Set<Long> organizedEventIds = user.getOrganizedEvents().stream()
-                .map(Event::getId)
-                .collect(Collectors.toSet());
-
-        Set<Long> attendanceIds = user.getAttendances().stream()
-                .map(Attendance::getId)
-                .collect(Collectors.toSet());
-
         return new UserResponseDto(
                 user.getId(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getEmail(),
-                organizedEventIds,
-                attendanceIds
+                user.getEmail()
         );
     }
 
@@ -75,15 +87,18 @@ public class Utils {
         EventSummaryDto eventSummaryDto = new EventSummaryDto(
                 event.getId(),
                 event.getTitle(),
+                event.getDescription(),
                 event.getDateTime(),
-                event.getLocation()
+                event.getLocation(),
+                event.isCancelled()
         );
 
         return new AttendanceResponseDto(
                 attendance.getId(),
                 userSummaryDto,
                 eventSummaryDto,
-                attendance.getStatus()
+                attendance.getStatus(),
+                attendance.getRole()
         );
     }
 
@@ -104,19 +119,13 @@ public class Utils {
                 invitor.getEmail()
         );
 
-        Event event = invitation.getEvent();
-        EventSummaryDto eventSummary = new EventSummaryDto(
-                event.getId(),
-                event.getTitle(),
-                event.getDateTime(),
-                event.getLocation()
-        );
+        EventResponseDto eventResponseDto = mapEventToResponseDto(invitation.getEvent());
 
         return new InvitationResponseDto(
                 invitation.getId(),
                 inviteeSummary,
                 invitorSummary,
-                eventSummary,
+                eventResponseDto,
                 invitation.getInvitationSentDate(),
                 invitation.getStatus()
         );
@@ -136,7 +145,8 @@ public class Utils {
                 recipientSummary,
                 notification.getMessage(),
                 notification.getType(),
-                notification.getCreatedAt()
+                notification.getCreatedAt(),
+                notification.isRead()
         );
     }
 

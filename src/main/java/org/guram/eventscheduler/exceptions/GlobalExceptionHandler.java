@@ -1,9 +1,5 @@
-package org.guram.eventscheduler.controllers;
+package org.guram.eventscheduler.exceptions;
 
-import org.guram.eventscheduler.exceptions.ConflictException;
-import org.guram.eventscheduler.exceptions.ForbiddenOperationException;
-import org.guram.eventscheduler.exceptions.InvalidStatusTransitionException;
-import org.guram.eventscheduler.exceptions.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

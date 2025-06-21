@@ -6,8 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -16,7 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(exclude = { "password", "organizedEvents", "attendances", "sentInvitations", "receivedInvitations" })
+@ToString(exclude = { "password", "attendances", "sentInvitations", "receivedInvitations" })
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,16 +43,20 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @ManyToMany(mappedBy = "organizers")
-    private Set<Event> organizedEvents = new HashSet<>();
-
     @OneToMany(mappedBy = "user")
-    private Set<Attendance> attendances = new HashSet<>();
+//    @OrderBy("event.dateTime ASC")
+    private List<Attendance> attendances = new ArrayList<>();
 
     @OneToMany(mappedBy = "invitee")
-    private Set<Invitation> receivedInvitations = new HashSet<>();
+    @OrderBy("invitationSentDate DESC")
+    private List<Invitation> receivedInvitations = new ArrayList<>();
 
     @OneToMany(mappedBy = "invitor")
-    private Set<Invitation> sentInvitations = new HashSet<>();
+    @OrderBy("invitationSentDate DESC")
+    private List<Invitation> sentInvitations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt DESC")
+    private List<Notification> notifications = new ArrayList<>();
 
 }

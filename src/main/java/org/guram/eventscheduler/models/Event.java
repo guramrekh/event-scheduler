@@ -8,7 +8,9 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -18,7 +20,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(exclude = { "organizers", "attendances", "invitations" })
+@ToString(exclude = { "attendances", "invitations" })
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,18 +46,14 @@ public class Event {
     @Column(length = 100)
     private String location;
 
-    @ManyToMany
-    @JoinTable(
-            name = "event_organizers",
-            joinColumns = @JoinColumn(name = "event_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> organizers = new HashSet<>();
+    @Column(nullable = false)
+    private boolean isCancelled = false;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Attendance> attendances = new HashSet<>();
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Invitation> invitations = new HashSet<>();
+    @OrderBy("invitationSentDate DESC")
+    private List<Invitation> invitations = new ArrayList<>();
 
 }

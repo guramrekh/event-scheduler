@@ -1,12 +1,10 @@
 package org.guram.eventscheduler.dtos.userDtos;
 
-import java.util.Set;
+import jakarta.validation.constraints.NotNull;
 
 public record UserResponseDto(
-        Long id,
-        String firstName,
-        String lastName,
-        String email,
-        Set<Long> organizedEventIds,
-        Set<Long> attendanceIds
+        @NotNull Long id,
+        @NotNull String firstName,
+        @NotNull String lastName,
+        @NotNull String email
 ) {}

@@ -9,12 +9,12 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
 public class Attendance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -27,4 +27,15 @@ public class Attendance {
 
     @Enumerated(EnumType.STRING)
     private AttendanceStatus status = AttendanceStatus.REGISTERED;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AttendanceRole role;
+
+
+    public Attendance(User user, Event event, AttendanceRole role) {
+        this.user = user;
+        this.event = event;
+        this.role = role;
+    }
 }

@@ -2,19 +2,19 @@ package org.guram.eventscheduler.services;
 
 import org.guram.eventscheduler.dtos.userDtos.UserCreateDto;
 import org.guram.eventscheduler.dtos.userDtos.UserResponseDto;
-import org.guram.eventscheduler.dtos.userDtos.UserUpdateDto;
+import org.guram.eventscheduler.dtos.userDtos.UserEditDto;
 import org.guram.eventscheduler.exceptions.ConflictException;
 import org.guram.eventscheduler.exceptions.UserNotFoundException;
 import org.guram.eventscheduler.models.User;
 import org.guram.eventscheduler.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -49,38 +49,23 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(Long id) {
-        userRepo.deleteById(id);
+    public void deleteUser(User currentUser) {
+        userRepo.deleteById(currentUser.getId());
     }
 
     @Transactional
-    public UserResponseDto updateUser(Long id, UserUpdateDto userUpdateDto) {
-        User user = findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-
-        if (userUpdateDto.firstName() != null)
-            user.setFirstName(userUpdateDto.firstName());
-        if (userUpdateDto.lastName() != null)
-            user.setLastName(userUpdateDto.lastName());
-        if (userUpdateDto.password() != null) {
-            String newPasswordEncoded = passwordEncoder.encode(userUpdateDto.password());
+    public UserResponseDto editUser(User user, UserEditDto userEditDto) {
+        if (userEditDto.firstName() != null)
+            user.setFirstName(userEditDto.firstName());
+        if (userEditDto.lastName() != null)
+            user.setLastName(userEditDto.lastName());
+        if (userEditDto.password() != null) {
+            String newPasswordEncoded = passwordEncoder.encode(userEditDto.password());
             user.setPassword(newPasswordEncoded);
         }
 
         User updatedUser = userRepo.save(user);
         return Utils.mapUserToResponseDto(updatedUser);
-    }
-
-    public List<UserResponseDto> findAllUsers() {
-        return userRepo.findAll().stream()
-                .map(Utils::mapUserToResponseDto)
-                .collect(Collectors.toList());
-    }
-
-    public UserResponseDto findUserById(Long id) {
-        User user = findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-        return Utils.mapUserToResponseDto(user);
     }
 
     public UserResponseDto findUserByEmail(String email) {
@@ -89,6 +74,17 @@ public class UserService {
         return Utils.mapUserToResponseDto(user);
     }
 
+    public User getCurrentUser(UserDetails userDetails) {
+        String email = userDetails.getUsername();
+        return findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email + ". This should not happen for an authenticated user."));
+    }
+
+    public List<UserResponseDto> findUsersByName(String firstName, String lastName) {
+        return userRepo.findByFirstNameIgnoreCaseAndLastNameIgnoreCaseOrderByEmailAsc(firstName, lastName).stream()
+                .map(Utils::mapUserToResponseDto)
+                .toList();
+    }
 
     public Optional<User> findById(Long id) {
         return userRepo.findById(id);

@@ -21,8 +21,5 @@ public record EventCreateDto(
 
         @NotBlank(message = "Location is mandatory")
         @Size(min = 3, max = 100, message = "Event location must be between 3 and 100 characters")
-        String location,
-
-        @NotNull(message = "Organizer user ID is mandatory")
-        Long organizerUserId
+        String location
 ) {}

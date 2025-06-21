@@ -8,8 +8,9 @@ import java.time.LocalDateTime;
 
 public record NotificationResponseDto(
         @NotNull Long id,
-        UserSummaryDto recipient,
+        @NotNull UserSummaryDto recipient,
         @NotNull String message,
         @NotNull NotificationType type,
-        LocalDateTime createdAt
+        @NotNull LocalDateTime createdAt,
+        boolean read
 ) {}

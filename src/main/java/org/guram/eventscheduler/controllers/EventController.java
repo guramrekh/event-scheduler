@@ -4,6 +4,9 @@ import jakarta.validation.Valid;
 import org.guram.eventscheduler.dtos.eventDtos.EventCreateDto;
 import org.guram.eventscheduler.dtos.eventDtos.EventEditDto;
 import org.guram.eventscheduler.dtos.eventDtos.EventResponseDto;
+import org.guram.eventscheduler.dtos.eventDtos.EventWithRoleDto;
+import org.guram.eventscheduler.models.AttendanceRole;
+import org.guram.eventscheduler.models.User;
 import org.guram.eventscheduler.services.EventService;
 import org.guram.eventscheduler.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +18,9 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
 
-import static org.guram.eventscheduler.controllers.Utils.getCurrentUser;
 
 @RestController
-@RequestMapping("/event")
+@RequestMapping("/events")
 public class EventController {
 
     private final EventService eventService;
@@ -31,60 +33,94 @@ public class EventController {
     }
 
 
+    @GetMapping()
+    public ResponseEntity<List<EventWithRoleDto>> getEvents(
+                                    @RequestParam(defaultValue = "UPCOMING") String timeframe,
+                                    @RequestParam(required = false) AttendanceRole role,
+                                    @RequestParam(defaultValue = "false") boolean showCancelled,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        User currentUser = userService.getCurrentUser(userDetails);
+        var events = eventService.getFilteredEventsWithRole(currentUser, role, timeframe, showCancelled);
+        return ResponseEntity.ok(events);
+    }
+
     @PostMapping("/create")
-    public ResponseEntity<EventResponseDto> createEvent(@Valid @RequestBody EventCreateDto eventCreateDto) {
-        EventResponseDto event = eventService.createEvent(eventCreateDto);
-        URI location = URI.create("/event/" + event.id());
+    public ResponseEntity<EventResponseDto> createEvent(
+                                    @Valid @RequestBody EventCreateDto eventCreateDto,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        User currentUser = userService.getCurrentUser(userDetails);
+        EventResponseDto event = eventService.createEvent(currentUser, eventCreateDto);
+        URI location = URI.create("/events/" + event.id());
         return ResponseEntity.created(location).body(event);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<EventResponseDto> getEventById(@PathVariable Long id) {
-        EventResponseDto event = eventService.getEventById(id);
-        return ResponseEntity.ok(event);
-    }
-
-    @GetMapping("/upcoming")
-    public ResponseEntity<List<EventResponseDto>> listUpcomingEvents() {
-        List<EventResponseDto> upcomingEvents = eventService.findUpcomingEvents();
-        return ResponseEntity.ok(upcomingEvents);
-    }
-
-    @PutMapping("/{id}/edit")
+    @PutMapping("/{eventId}/edit")
     public ResponseEntity<EventResponseDto> editEvent(
-                        @PathVariable Long id,
-                        @AuthenticationPrincipal UserDetails userDetails,
-                        @Valid @RequestBody EventEditDto eventEditDto) {
-        Long currentUserId = getCurrentUser(userDetails, userService).getId();
-        EventResponseDto event = eventService.editEvent(id, currentUserId, eventEditDto);
+                                    @PathVariable Long eventId,
+                                    @RequestParam(defaultValue = "true") boolean notifyParticipants,
+                                    @Valid @RequestBody EventEditDto eventEditDto,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        Long currentUserId = userService.getCurrentUser(userDetails).getId();
+        EventResponseDto event = eventService.editEvent(eventId, currentUserId, eventEditDto, notifyParticipants);
         return ResponseEntity.ok(event);
     }
 
-    @DeleteMapping("/{eventId}/cancel")
-    public ResponseEntity<Void> cancelEvent(@PathVariable Long eventId,
-                                            @AuthenticationPrincipal UserDetails userDetails) {
-        Long currentUserId = getCurrentUser(userDetails, userService).getId();
+    @PutMapping("/{eventId}/cancel")
+    public ResponseEntity<Void> cancelEvent(
+                                    @PathVariable Long eventId,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        Long currentUserId = userService.getCurrentUser(userDetails).getId();
         eventService.cancelEvent(eventId, currentUserId);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{eventId}/organizers/add")
-    public ResponseEntity<EventResponseDto> addOrganizer(
+    @PutMapping("/{eventId}/add-organizer")
+    public ResponseEntity<EventResponseDto> addAsOrganizer(
                                     @PathVariable Long eventId,
                                     @RequestParam Long newOrgUserId,
                                     @AuthenticationPrincipal UserDetails userDetails) {
-        Long currentUserID = getCurrentUser(userDetails, userService).getId();
-        EventResponseDto event = eventService.addOrganizer(eventId, currentUserID, newOrgUserId);
+        User currentUser = userService.getCurrentUser(userDetails);
+        EventResponseDto event = eventService.makeAttendeeOrganizer(currentUser, newOrgUserId, eventId);
         return ResponseEntity.ok(event);
     }
 
-    @DeleteMapping("/{eventId}/organizers/remove")
-    public ResponseEntity<EventResponseDto> removeOrganizer(
+    @PutMapping("/{eventId}/remove-organizer")
+    public ResponseEntity<EventResponseDto> removeAsOrganizer(
                                     @PathVariable Long eventId,
                                     @RequestParam Long removeUserId,
                                     @AuthenticationPrincipal UserDetails userDetails) {
-        Long currentUserId = getCurrentUser(userDetails, userService).getId();
-        EventResponseDto event = eventService.removeOrganizer(eventId, currentUserId, removeUserId);
+        User currentUser = userService.getCurrentUser(userDetails);
+        EventResponseDto event = eventService.removeOrganizerRole(currentUser, removeUserId, eventId);
         return ResponseEntity.ok(event);
     }
+
+    @PutMapping("/{eventId}/kickout-attendee")
+    public ResponseEntity<EventResponseDto> kickOutAttendee(
+                                    @PathVariable Long eventId,
+                                    @RequestParam Long removeUserId,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        User currentUser = userService.getCurrentUser(userDetails);
+        EventResponseDto event = eventService.kickUserFromEvent(currentUser, removeUserId, eventId);
+        return ResponseEntity.ok(event);
+    }
+
+    @PutMapping("/mark-attended")
+    public ResponseEntity<EventResponseDto> markAttended(
+                                    @RequestParam Long eventId,
+                                    @RequestParam Long attendeeUserId,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        User currentUser = userService.getCurrentUser(userDetails);
+        EventResponseDto event = eventService.markAttended(currentUser, attendeeUserId, eventId);
+        return ResponseEntity.ok(event);
+    }
+
+    @PutMapping("/mark-all-attended")
+    public ResponseEntity<EventResponseDto> markAllAttended(
+                                    @RequestParam Long eventId,
+                                    @AuthenticationPrincipal UserDetails userDetails) {
+        User currentUser = userService.getCurrentUser(userDetails);
+        EventResponseDto event = eventService.markAllAttended(currentUser, eventId);
+        return ResponseEntity.ok(event);
+    }
+
 }

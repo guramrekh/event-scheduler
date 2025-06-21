@@ -1,10 +1,10 @@
 package org.guram.eventscheduler.services;
 
 import org.guram.eventscheduler.dtos.notificationDtos.NotificationResponseDto;
-import org.guram.eventscheduler.exceptions.UserNotFoundException;
+import org.guram.eventscheduler.exceptions.ForbiddenOperationException;
+import org.guram.eventscheduler.exceptions.ResourceNotFoundException;
 import org.guram.eventscheduler.models.*;
 import org.guram.eventscheduler.repositories.NotificationRepository;
-import org.guram.eventscheduler.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,63 +16,77 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
     private final NotificationRepository notificationRepo;
-    private final UserRepository userRepo;
 
     @Autowired
-    public NotificationService(NotificationRepository notificationRepo, UserRepository userRepo) {
+    public NotificationService(NotificationRepository notificationRepo) {
         this.notificationRepo = notificationRepo;
-        this.userRepo = userRepo;
     }
 
 
     @Transactional
-    public Notification createNotification(User recipient, String message, NotificationType type) {
+    public void createNotification(User recipient, String message, NotificationType type) {
         Notification notification = new Notification();
         notification.setRecipient(recipient);
         notification.setMessage(message);
         notification.setType(type);
-        return notificationRepo.save(notification);
+        notificationRepo.save(notification);
     }
 
-    public List<NotificationResponseDto> getNotificationsForUser(Long userId) {
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
+    public List<NotificationResponseDto> getNotificationsForUser(User user) {
         return notificationRepo.findByRecipientOrderByCreatedAtDesc(user).stream()
                 .map(Utils::mapNotificationToResponseDto)
                 .collect(Collectors.toList());
     }
 
+    public void markNotificationAsRead(Long notificationId, User user) {
+        Notification notification = notificationRepo.getNotificationById(notificationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification", notificationId));
+
+        if (notification.getRecipient() != user)
+            throw new ForbiddenOperationException("User (ID=" + user.getId() + ") is not authorized for this notification.");
+
+        if (notification.isRead())
+            return;
+
+        notification.setRead(true);
+        notificationRepo.save(notification);
+    }
+
+    public void markAllNotificationAsRead(User user) {
+        notificationRepo.markAllAsReadForUser(user);
+    }
+
     public String generateInvitationMessage(Event event) {
-        return String.format("You have been invited to the event: %s", event.getTitle());
+        return String.format("You have been invited to '%s'", event.getTitle());
     }
-
     public String generateEventCancelledMessage(Event event) {
-        return String.format("The event '%s' has been cancelled.", event.getTitle());
+        return String.format("'%s' has been cancelled.", event.getTitle());
     }
-
     public String generateEventUpdatedMessage(Event event) {
-        return String.format("The details for the event '%s' have been updated.", event.getTitle());
+        return String.format("The details for '%s' have been updated.", event.getTitle());
     }
-
     public String generateInvitationResponseMessage(User invitee, Event event, InvitationStatus response) {
-        return String.format("%s %s has %s your invitation to the event: %s",
+        return String.format("%s %s has %s your invitation to '%s'",
                 invitee.getFirstName(), invitee.getLastName(),
                 response.toString().toLowerCase(),
                 event.getTitle());
     }
-
     public String generateAddedAsOrganizerMessage(User invitor, Event event) {
-        return String.format("%s %s added you as organizer to the event: %s",
+        return String.format("%s %s has added you as an organizer to '%s'",
                 invitor.getFirstName(),
                 invitor.getLastName(),
                 event.getTitle());
     }
-
     public String generateRemovedAsOrganizerMessage(User invitor, Event event) {
-        return String.format("%s %s removed you as organizer to the event: %s",
+        return String.format("%s %s has removed you as an organizer from '%s'",
                 invitor.getFirstName(),
                 invitor.getLastName(),
+                event.getTitle());
+    }
+    public String generateKickedOutFromEventMessage(User organizer, Event event) {
+        return String.format("%s %s has kicked you out of '%s'",
+                organizer.getFirstName(),
+                organizer.getLastName(),
                 event.getTitle());
     }
 

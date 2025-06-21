@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record UserSummaryDto (
         @NotNull Long id,
-        String firstName,
-        String lastName,
-        String email
+        @NotNull String firstName,
+        @NotNull String lastName,
+        @NotNull String email
 ) {}

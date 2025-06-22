@@ -5,6 +5,7 @@ import org.guram.eventscheduler.exceptions.ForbiddenOperationException;
 import org.guram.eventscheduler.exceptions.ResourceNotFoundException;
 import org.guram.eventscheduler.models.*;
 import org.guram.eventscheduler.repositories.NotificationRepository;
+import org.guram.eventscheduler.utils.EntityToDtoMappings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +35,7 @@ public class NotificationService {
 
     public List<NotificationResponseDto> getNotificationsForUser(User user) {
         return notificationRepo.findByRecipientOrderByCreatedAtDesc(user).stream()
-                .map(Utils::mapNotificationToResponseDto)
+                .map(EntityToDtoMappings::mapNotificationToResponseDto)
                 .collect(Collectors.toList());
     }
 

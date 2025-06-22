@@ -1,4 +1,4 @@
-package org.guram.eventscheduler.services;
+package org.guram.eventscheduler.utils;
 
 import org.guram.eventscheduler.dtos.attendanceDtos.AttendanceResponseDto;
 import org.guram.eventscheduler.dtos.eventDtos.EventResponseDto;
@@ -7,24 +7,13 @@ import org.guram.eventscheduler.dtos.invitationDtos.InvitationResponseDto;
 import org.guram.eventscheduler.dtos.notificationDtos.NotificationResponseDto;
 import org.guram.eventscheduler.dtos.userDtos.UserResponseDto;
 import org.guram.eventscheduler.dtos.userDtos.UserSummaryDto;
-import org.guram.eventscheduler.exceptions.ForbiddenOperationException;
 import org.guram.eventscheduler.models.*;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Utils {
-
-    public static void checkIsOrganizer(Long actorUserId, Event event) {
-        boolean actorIsOrganizer = event.getAttendances().stream()
-                .filter(att -> att.getRole() == AttendanceRole.ORGANIZER)
-                .anyMatch(att -> att.getUser().getId().equals(actorUserId));
-
-        if (!actorIsOrganizer) {
-            throw new ForbiddenOperationException("User (ID=" + actorUserId + ") is not an organizer for this event.");
-        }
-    }
+public class EntityToDtoMappings {
 
     public static EventResponseDto mapEventToResponseDto(Event event) {
         var everyAttendance = event.getAttendances();
@@ -66,11 +55,35 @@ public class Utils {
     }
 
     public static UserResponseDto mapUserToResponseDto(User user) {
+        var everyAttendance = user.getAttendances();
+        long attendedEventsCount = everyAttendance.stream()
+                .filter(att -> att.getStatus() == AttendanceStatus.ATTENDED)
+                .count();
+
+        long organizedEventsCount = everyAttendance.stream()
+                .filter(att ->
+                        att.getStatus() == AttendanceStatus.ATTENDED &&
+                        att.getRole() == AttendanceRole.ORGANIZER
+                )
+                .count();
+
+        long withdrawnFromEventsCount = everyAttendance.stream()
+                .filter(att -> att.getStatus() == AttendanceStatus.WITHDRAWN)
+                .count();
+
+        long kickedOutFromEventsCount = everyAttendance.stream()
+                .filter(att -> att.getStatus() == AttendanceStatus.KICKED)
+                .count();
+
         return new UserResponseDto(
                 user.getId(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getEmail()
+                user.getEmail(),
+                (int) attendedEventsCount,
+                (int) organizedEventsCount,
+                (int) withdrawnFromEventsCount,
+                (int) kickedOutFromEventsCount
         );
     }
 
@@ -149,5 +162,4 @@ public class Utils {
                 notification.isRead()
         );
     }
-
 }

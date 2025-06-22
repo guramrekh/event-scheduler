@@ -7,12 +7,13 @@ import org.guram.eventscheduler.exceptions.ResourceNotFoundException;
 import org.guram.eventscheduler.models.*;
 import org.guram.eventscheduler.repositories.AttendanceRepository;
 import org.guram.eventscheduler.repositories.EventRepository;
-import org.guram.eventscheduler.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+
+import static org.guram.eventscheduler.utils.EntityToDtoMappings.mapAttendanceToResponseDto;
 
 @Service
 public class AttendanceService {
@@ -33,14 +34,14 @@ public class AttendanceService {
         if (existingAttendance.isPresent()) {
             Attendance attendance = existingAttendance.get();
             if (attendance.getStatus() == AttendanceStatus.REGISTERED) {
-                Utils.mapAttendanceToResponseDto(attendance);
+                mapAttendanceToResponseDto(attendance);
                 return;
             }
             if (attendance.getStatus() == AttendanceStatus.WITHDRAWN ||
-                    attendance.getStatus() == AttendanceStatus.KICKED ) {
+                    attendance.getStatus() == AttendanceStatus.KICKED) {
                 attendance.setStatus(AttendanceStatus.REGISTERED);
                 Attendance updated = attendanceRepo.save(attendance);
-                Utils.mapAttendanceToResponseDto(updated);
+                mapAttendanceToResponseDto(updated);
                 return;
             }
             throw new ConflictException("User (ID=" + user.getId() + ") already has an attendance record for event (ID=" + event.getId() + ") with status " + attendance.getStatus() + ".");
@@ -56,7 +57,7 @@ public class AttendanceService {
         event.getAttendances().add(newAttendance);
 
         Attendance savedAttendance = attendanceRepo.save(newAttendance);
-        Utils.mapAttendanceToResponseDto(savedAttendance);
+        mapAttendanceToResponseDto(savedAttendance);
     }
 
     @Transactional
@@ -69,7 +70,7 @@ public class AttendanceService {
 
         attendance.setStatus(AttendanceStatus.WITHDRAWN);
         Attendance cancelledAttendance = attendanceRepo.save(attendance);
-        return Utils.mapAttendanceToResponseDto(cancelledAttendance);
+        return mapAttendanceToResponseDto(cancelledAttendance);
     }
 
     public AttendanceRole getAttendanceRole(User user, Event event) {

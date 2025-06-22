@@ -6,5 +6,9 @@ public record UserResponseDto(
         @NotNull Long id,
         @NotNull String firstName,
         @NotNull String lastName,
-        @NotNull String email
+        @NotNull String email,
+        int attendedEventsCount,
+        int organizedEventsCount,
+        int withdrawnFromEventsCount,
+        int kickedOutFromEventsCount
 ) {}

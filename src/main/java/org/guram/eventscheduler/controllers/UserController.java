@@ -1,18 +1,21 @@
 package org.guram.eventscheduler.controllers;
 
 import jakarta.validation.Valid;
+import org.guram.eventscheduler.dtos.userDtos.PasswordChangeDto;
 import org.guram.eventscheduler.dtos.userDtos.UserResponseDto;
-import org.guram.eventscheduler.dtos.userDtos.UserEditDto;
+import org.guram.eventscheduler.dtos.userDtos.UserProfileEditDto;
 import org.guram.eventscheduler.models.User;
 import org.guram.eventscheduler.services.UserService;
-import org.guram.eventscheduler.services.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static org.guram.eventscheduler.utils.EntityToDtoMappings.mapUserToResponseDto;
 
 
 @RestController
@@ -29,7 +32,7 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> getCurrentUserInfo(@AuthenticationPrincipal UserDetails userDetails) {
-        UserResponseDto user = Utils.mapUserToResponseDto(userService.getCurrentUser(userDetails));
+        UserResponseDto user = mapUserToResponseDto(userService.getCurrentUser(userDetails));
         return ResponseEntity.ok(user);
     }
 
@@ -55,10 +58,18 @@ public class UserController {
 
     @PutMapping("/edit")
     public ResponseEntity<UserResponseDto> editUser(@AuthenticationPrincipal UserDetails userDetails,
-                                                      @Valid @RequestBody UserEditDto userEditDto) {
+                                                      @Valid @RequestBody UserProfileEditDto userProfileEditDto) {
         User currentUser = userService.getCurrentUser(userDetails);
-        UserResponseDto user = userService.editUser(currentUser, userEditDto);
+        UserResponseDto user = userService.editUser(currentUser, userProfileEditDto);
         return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/change-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changePassword(@AuthenticationPrincipal UserDetails userDetails,
+                               @Valid @RequestBody PasswordChangeDto passwordChangeDto) {
+        User currentUser = userService.getCurrentUser(userDetails);
+        userService.changePassword(currentUser, passwordChangeDto);
     }
 
 }

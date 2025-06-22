@@ -6,6 +6,7 @@ import org.guram.eventscheduler.models.*;
 import org.guram.eventscheduler.repositories.EventRepository;
 import org.guram.eventscheduler.repositories.InvitationRepository;
 import org.guram.eventscheduler.repositories.UserRepository;
+import org.guram.eventscheduler.utils.EntityToDtoMappings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.guram.eventscheduler.services.EventService.checkIsOrganizer;
+import static org.guram.eventscheduler.utils.EntityToDtoMappings.mapInvitationToResponseDto;
 
 @Service
 public class InvitationService {
@@ -48,7 +52,7 @@ public class InvitationService {
         User invitee = userRepository.findById(inviteeId)
                 .orElseThrow(() -> new UserNotFoundException(inviteeId));
 
-        Utils.checkIsOrganizer(invitorId, event);
+        checkIsOrganizer(invitorId, event);
 
         Optional<Invitation> existingInvitation = invitationRepository.findByInviteeAndEvent(invitee, event);
         if (existingInvitation.isPresent()) {
@@ -70,7 +74,7 @@ public class InvitationService {
         String message = notificationService.generateInvitationMessage(savedInvitation.getEvent());
         notificationService.createNotification(savedInvitation.getInvitee(), message, NotificationType.EVENT_INVITATION_RECEIVED);
 
-        return Utils.mapInvitationToResponseDto(savedInvitation);
+        return mapInvitationToResponseDto(savedInvitation);
     }
 
     @Transactional
@@ -112,13 +116,13 @@ public class InvitationService {
         }
 
         Invitation updatedInvitation = invitationRepository.save(invitation);
-        return Utils.mapInvitationToResponseDto(updatedInvitation);
+        return mapInvitationToResponseDto(updatedInvitation);
     }
 
     public List<InvitationResponseDto> listInvitationsReceivedByUserByStatus(User user, InvitationStatus status) {
         status = (status == null) ? InvitationStatus.PENDING : status;
         return invitationRepository.findByInviteeAndStatusOrderByInvitationSentDateAsc(user, status).stream()
-                .map(Utils::mapInvitationToResponseDto)
+                .map(EntityToDtoMappings::mapInvitationToResponseDto)
                 .collect(Collectors.toList());
     }
 

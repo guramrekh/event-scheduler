@@ -1,12 +1,14 @@
 package org.guram.eventscheduler.services;
 
+import org.guram.eventscheduler.dtos.userDtos.PasswordChangeDto;
 import org.guram.eventscheduler.dtos.userDtos.UserCreateDto;
 import org.guram.eventscheduler.dtos.userDtos.UserResponseDto;
-import org.guram.eventscheduler.dtos.userDtos.UserEditDto;
+import org.guram.eventscheduler.dtos.userDtos.UserProfileEditDto;
 import org.guram.eventscheduler.exceptions.ConflictException;
 import org.guram.eventscheduler.exceptions.UserNotFoundException;
 import org.guram.eventscheduler.models.User;
 import org.guram.eventscheduler.repositories.UserRepository;
+import org.guram.eventscheduler.utils.EntityToDtoMappings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.guram.eventscheduler.utils.EntityToDtoMappings.mapUserToResponseDto;
 
 @Service
 public class UserService {
@@ -45,7 +49,7 @@ public class UserService {
         user.setPassword(hashed);
 
         User newUser = userRepo.save(user);
-        return Utils.mapUserToResponseDto(newUser);
+        return mapUserToResponseDto(newUser);
     }
 
     @Transactional
@@ -54,24 +58,32 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDto editUser(User user, UserEditDto userEditDto) {
-        if (userEditDto.firstName() != null)
-            user.setFirstName(userEditDto.firstName());
-        if (userEditDto.lastName() != null)
-            user.setLastName(userEditDto.lastName());
-        if (userEditDto.password() != null) {
-            String newPasswordEncoded = passwordEncoder.encode(userEditDto.password());
-            user.setPassword(newPasswordEncoded);
-        }
+    public UserResponseDto editUser(User user, UserProfileEditDto userProfileEditDto) {
+        if (userProfileEditDto.firstName() != null)
+            user.setFirstName(userProfileEditDto.firstName());
+        if (userProfileEditDto.lastName() != null)
+            user.setLastName(userProfileEditDto.lastName());
 
         User updatedUser = userRepo.save(user);
-        return Utils.mapUserToResponseDto(updatedUser);
+        return mapUserToResponseDto(updatedUser);
+    }
+
+    @Transactional
+    public void changePassword(User user, PasswordChangeDto passwordChangeDto) {
+        if (!passwordEncoder.matches(passwordChangeDto.currentPassword(), user.getPassword()))
+            throw new ConflictException("Incorrect current password.");
+
+        if (passwordEncoder.matches(passwordChangeDto.newPassword(), user.getPassword()))
+            throw new ConflictException("New password cannot be the same as the old password");
+
+        user.setPassword(passwordEncoder.encode(passwordChangeDto.newPassword()));
+        userRepo.save(user);
     }
 
     public UserResponseDto findUserByEmail(String email) {
         User user = findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User with email '" + email + "' not found"));
-        return Utils.mapUserToResponseDto(user);
+        return mapUserToResponseDto(user);
     }
 
     public User getCurrentUser(UserDetails userDetails) {
@@ -82,7 +94,7 @@ public class UserService {
 
     public List<UserResponseDto> findUsersByName(String firstName, String lastName) {
         return userRepo.findByFirstNameIgnoreCaseAndLastNameIgnoreCaseOrderByEmailAsc(firstName, lastName).stream()
-                .map(Utils::mapUserToResponseDto)
+                .map(EntityToDtoMappings::mapUserToResponseDto)
                 .toList();
     }
 

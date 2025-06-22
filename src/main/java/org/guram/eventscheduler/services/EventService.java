@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.guram.eventscheduler.utils.EntityToDtoMappings.mapEventToResponseDto;
+
 @Service
 public class EventService {
 
@@ -53,14 +55,14 @@ public class EventService {
         organizer.getAttendances().add(organizerAttendance);
 
         Event savedEvent = eventRepo.save(event);
-        return Utils.mapEventToResponseDto(savedEvent);
+        return mapEventToResponseDto(savedEvent);
     }
 
     @Transactional
     public EventResponseDto makeAttendeeOrganizer(User actorUser, Long newOrgUserId, Long eventId) {
         Event event = findEventById(eventId);
 
-        Utils.checkIsOrganizer(actorUser.getId(), event);
+        checkIsOrganizer(actorUser.getId(), event);
 
         User newOrgUser = userRepo.findById(newOrgUserId)
                 .orElseThrow(() -> new UserNotFoundException(newOrgUserId));
@@ -69,46 +71,46 @@ public class EventService {
                 .orElseThrow(() -> new ResourceNotFoundException("Attendance", newOrgUserId));
 
         if (newOrganizerAttendance.getRole() == AttendanceRole.ORGANIZER)
-            return Utils.mapEventToResponseDto(event);
+            return mapEventToResponseDto(event);
 
         newOrganizerAttendance.setRole(AttendanceRole.ORGANIZER);
 
         String message = notificationService.generateAddedAsOrganizerMessage(actorUser, event);
         notificationService.createNotification(newOrgUser, message, NotificationType.ADDED_AS_ORGANIZER);
 
-        return Utils.mapEventToResponseDto(event);
+        return mapEventToResponseDto(event);
     }
 
     @Transactional
     public EventResponseDto removeOrganizerRole(User actorUser, Long removeUserId, Long eventId) {
         Event event = findEventById(eventId);
 
-        Utils.checkIsOrganizer(actorUser.getId(), event);
+        checkIsOrganizer(actorUser.getId(), event);
 
         User orgToRemove = userRepo.findById(removeUserId)
                 .orElseThrow(() -> new UserNotFoundException(removeUserId));
 
-        Utils.checkIsOrganizer(removeUserId, event);
+        checkIsOrganizer(removeUserId, event);
 
         Attendance removeOrgAttendance = attendanceRepo.findByUserAndEvent(orgToRemove, event)
                 .orElseThrow(() -> new ResourceNotFoundException("Attendance", removeUserId));
 
         if (removeOrgAttendance.getRole() == AttendanceRole.ATTENDEE)
-            return Utils.mapEventToResponseDto(event);
+            return mapEventToResponseDto(event);
 
         removeOrgAttendance.setRole(AttendanceRole.ATTENDEE);
 
         String message = notificationService.generateRemovedAsOrganizerMessage(actorUser, event);
         notificationService.createNotification(orgToRemove, message, NotificationType.REMOVED_AS_ORGANIZER);
 
-        return Utils.mapEventToResponseDto(event);
+        return mapEventToResponseDto(event);
     }
 
     @Transactional
     public EventResponseDto kickUserFromEvent(User organizer, Long userToKickId, Long eventId) {
         Event event = findEventById(eventId);
 
-        Utils.checkIsOrganizer(organizer.getId(), event);
+        checkIsOrganizer(organizer.getId(), event);
 
         User userToKick = userRepo.findById(userToKickId)
                 .orElseThrow(() -> new UserNotFoundException(userToKickId));
@@ -121,7 +123,7 @@ public class EventService {
         String message = notificationService.generateKickedOutFromEventMessage(organizer, event);
         notificationService.createNotification(userToKick, message, NotificationType.REMOVED_AS_ORGANIZER);
 
-        return Utils.mapEventToResponseDto(event);
+        return mapEventToResponseDto(event);
     }
 
     @Transactional
@@ -129,7 +131,7 @@ public class EventService {
                                       EventEditDto eventEditDto, boolean notifyParticipants) {
         Event event = findEventById(eventId);
 
-        Utils.checkIsOrganizer(actorUserId, event);
+        checkIsOrganizer(actorUserId, event);
 
         if (eventEditDto.title() != null)
             event.setTitle(eventEditDto.title());
@@ -155,14 +157,14 @@ public class EventService {
                     .forEach(user -> notificationService.createNotification(user, message, NotificationType.EVENT_DETAILS_UPDATED));
         }
 
-        return Utils.mapEventToResponseDto(editedEvent);
+        return mapEventToResponseDto(editedEvent);
     }
 
     @Transactional
     public void cancelEvent(Long eventId, Long actorUserId) {
         Event event = findEventById(eventId);
 
-        Utils.checkIsOrganizer(actorUserId, event);
+        checkIsOrganizer(actorUserId, event);
 
         event.setCancelled(true);
 
@@ -187,7 +189,7 @@ public class EventService {
         boolean upcoming = timeframe.equals("UPCOMING");
         return eventRepo.findByUserAndRoleAndDateTimeAndStatus(user, role, upcoming, cancelled).stream()
                 .map(event -> new EventWithRoleDto(
-                        Utils.mapEventToResponseDto(event),
+                        mapEventToResponseDto(event),
                         attendanceService.getAttendanceRole(user, event))
                 )
                 .collect(Collectors.toList());
@@ -198,7 +200,7 @@ public class EventService {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException(eventId));
 
-        Utils.checkIsOrganizer(organizer.getId(), event);
+        checkIsOrganizer(organizer.getId(), event);
 
         User attendee = userRepo.findById(attendeeUserId)
                 .orElseThrow(() -> new UserNotFoundException(attendeeUserId));
@@ -212,7 +214,7 @@ public class EventService {
         }
 
         attendance.setStatus(AttendanceStatus.ATTENDED);
-        return Utils.mapEventToResponseDto(event);
+        return mapEventToResponseDto(event);
     }
 
     @Transactional
@@ -220,16 +222,25 @@ public class EventService {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException(eventId));
 
-        Utils.checkIsOrganizer(organizer.getId(), event);
+        checkIsOrganizer(organizer.getId(), event);
 
         attendanceRepo.markAllAsAttended(event, AttendanceStatus.REGISTERED, AttendanceStatus.ATTENDED);
 
-        return Utils.mapEventToResponseDto(event);
+        return mapEventToResponseDto(event);
     }
 
     private Event findEventById(Long eventId) {
         return eventRepo.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException(eventId));
+    }
+
+    public static void checkIsOrganizer(Long actorUserId, Event event) {
+        boolean actorIsOrganizer = event.getAttendances().stream()
+                .filter(att -> att.getRole() == AttendanceRole.ORGANIZER)
+                .anyMatch(att -> att.getUser().getId().equals(actorUserId));
+
+        if (!actorIsOrganizer)
+            throw new ForbiddenOperationException("User (ID=" + actorUserId + ") is not an organizer for this event.");
     }
 
 }

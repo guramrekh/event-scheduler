@@ -44,7 +44,6 @@ public class User {
     private String password;
 
     @OneToMany(mappedBy = "user")
-//    @OrderBy("event.dateTime ASC")
     private List<Attendance> attendances = new ArrayList<>();
 
     @OneToMany(mappedBy = "invitee")

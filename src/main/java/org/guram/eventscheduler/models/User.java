@@ -41,6 +41,10 @@ public class User {
 
     private String profilePictureUrl;
 
+    @Size(max = 500)
+    @Column(length = 500)
+    private String bio;
+
     @NotBlank
     @Column(nullable = false)
     private String password;

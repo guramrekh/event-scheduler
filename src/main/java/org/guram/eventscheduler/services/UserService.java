@@ -59,10 +59,9 @@ public class UserService {
 
     @Transactional
     public UserResponseDto editUser(User user, UserProfileEditDto userProfileEditDto) {
-        if (userProfileEditDto.firstName() != null)
-            user.setFirstName(userProfileEditDto.firstName());
-        if (userProfileEditDto.lastName() != null)
-            user.setLastName(userProfileEditDto.lastName());
+        user.setFirstName(userProfileEditDto.firstName());
+        user.setLastName(userProfileEditDto.lastName());
+        user.setBio(userProfileEditDto.bio());
 
         User updatedUser = userRepo.save(user);
         return mapUserToResponseDto(updatedUser);

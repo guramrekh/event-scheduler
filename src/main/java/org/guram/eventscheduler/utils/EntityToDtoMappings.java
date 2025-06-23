@@ -23,7 +23,12 @@ public class EntityToDtoMappings {
                         (att.getStatus() == AttendanceStatus.REGISTERED || att.getStatus() == AttendanceStatus.ATTENDED))
                 .map(Attendance::getUser)
                 .map(user -> new UserSummaryDto(
-                        user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getProfilePictureUrl()
+                        user.getId(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getEmail(),
+                        user.getBio(),
+                        user.getProfilePictureUrl()
                 ))
                 .toList();
 
@@ -32,7 +37,12 @@ public class EntityToDtoMappings {
                         (att.getStatus() == AttendanceStatus.REGISTERED || att.getStatus() == AttendanceStatus.ATTENDED))
                 .map(Attendance::getUser)
                 .map(user -> new UserSummaryDto(
-                        user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getProfilePictureUrl()
+                        user.getId(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getEmail(),
+                        user.getBio(),
+                        user.getProfilePictureUrl()
                 ))
                 .toList();
 
@@ -80,6 +90,7 @@ public class EntityToDtoMappings {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
+                user.getBio(),
                 user.getProfilePictureUrl(),
                 (int) attendedEventsCount,
                 (int) organizedEventsCount,
@@ -95,6 +106,7 @@ public class EntityToDtoMappings {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
+                user.getBio(),
                 user.getProfilePictureUrl()
         );
 
@@ -124,6 +136,7 @@ public class EntityToDtoMappings {
                 invitee.getFirstName(),
                 invitee.getLastName(),
                 invitee.getEmail(),
+                invitee.getBio(),
                 invitee.getProfilePictureUrl()
         );
 
@@ -133,6 +146,7 @@ public class EntityToDtoMappings {
                 invitor.getFirstName(),
                 invitor.getLastName(),
                 invitor.getEmail(),
+                invitor.getBio(),
                 invitor.getProfilePictureUrl()
         );
 
@@ -155,6 +169,7 @@ public class EntityToDtoMappings {
                 recipient.getFirstName(),
                 recipient.getLastName(),
                 recipient.getEmail(),
+                recipient.getBio(),
                 recipient.getProfilePictureUrl()
         );
 

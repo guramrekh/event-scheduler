@@ -7,5 +7,6 @@ public record UserSummaryDto (
         @NotNull String firstName,
         @NotNull String lastName,
         @NotNull String email,
+        String bio,
         String profilePictureUrl
 ) {}

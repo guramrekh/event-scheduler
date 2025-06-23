@@ -2,9 +2,9 @@ package org.guram.eventscheduler.dtos.userDtos;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import org.guram.eventscheduler.utils.passwordvalidator.ConfirmNewPasswordMatches;
+import org.guram.eventscheduler.utils.passwordvalidator.ConfirmPasswordMatches;
 
-@ConfirmNewPasswordMatches
+@ConfirmPasswordMatches
 public record PasswordChangeDto(
         @NotNull
         String currentPassword,

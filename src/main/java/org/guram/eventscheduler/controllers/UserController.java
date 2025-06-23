@@ -2,6 +2,7 @@ package org.guram.eventscheduler.controllers;
 
 import jakarta.validation.Valid;
 import org.guram.eventscheduler.dtos.userDtos.PasswordChangeDto;
+import org.guram.eventscheduler.dtos.userDtos.ProfilePictureUploadDto;
 import org.guram.eventscheduler.dtos.userDtos.UserResponseDto;
 import org.guram.eventscheduler.dtos.userDtos.UserProfileEditDto;
 import org.guram.eventscheduler.models.User;
@@ -62,6 +63,21 @@ public class UserController {
         User currentUser = userService.getCurrentUser(userDetails);
         UserResponseDto user = userService.editUser(currentUser, userProfileEditDto);
         return ResponseEntity.ok(user);
+    }
+
+    @PutMapping("/upload-picture")
+    public ResponseEntity<Void> updateProfilePicture(@AuthenticationPrincipal UserDetails userDetails,
+                                @Valid @RequestBody ProfilePictureUploadDto profilePictureUploadDto) {
+        User currentUser = userService.getCurrentUser(userDetails);
+        userService.updateProfilePicture(currentUser, profilePictureUploadDto);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/remove-picture")
+    public ResponseEntity<Void> removeProfilePicture(@AuthenticationPrincipal UserDetails userDetails) {
+        User currentUser = userService.getCurrentUser(userDetails);
+        userService.removeUserProfilePicture(currentUser);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/change-password")

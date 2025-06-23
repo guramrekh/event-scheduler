@@ -4,7 +4,7 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.guram.eventscheduler.dtos.userDtos.PasswordChangeDto;
 
-public class ConfirmNewPasswordMatchesValidator implements ConstraintValidator<ConfirmNewPasswordMatches, PasswordChangeDto> {
+public class ConfirmPasswordMatchesValidator implements ConstraintValidator<ConfirmPasswordMatches, PasswordChangeDto> {
     @Override
     public boolean isValid(PasswordChangeDto passwordChangeDto, ConstraintValidatorContext constraintValidatorContext) {
         if (passwordChangeDto.newPassword() == null || passwordChangeDto.confirmNewPassword() == null)

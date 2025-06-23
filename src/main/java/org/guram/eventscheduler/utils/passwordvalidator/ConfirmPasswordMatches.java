@@ -8,10 +8,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Constraint(validatedBy = ConfirmNewPasswordMatchesValidator.class)
+@Constraint(validatedBy = ConfirmPasswordMatchesValidator.class)
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ConfirmNewPasswordMatches {
+public @interface ConfirmPasswordMatches {
 
     String message() default "New password and confirm new password do not match";
 

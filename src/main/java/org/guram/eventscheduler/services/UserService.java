@@ -1,9 +1,7 @@
 package org.guram.eventscheduler.services;
 
-import org.guram.eventscheduler.dtos.userDtos.PasswordChangeDto;
-import org.guram.eventscheduler.dtos.userDtos.UserCreateDto;
-import org.guram.eventscheduler.dtos.userDtos.UserResponseDto;
-import org.guram.eventscheduler.dtos.userDtos.UserProfileEditDto;
+import org.guram.eventscheduler.cloudinary.CloudinaryService;
+import org.guram.eventscheduler.dtos.userDtos.*;
 import org.guram.eventscheduler.exceptions.ConflictException;
 import org.guram.eventscheduler.exceptions.UserNotFoundException;
 import org.guram.eventscheduler.models.User;
@@ -25,11 +23,13 @@ public class UserService {
 
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
+    private final CloudinaryService cloudinaryService;
 
     @Autowired
-    public UserService(UserRepository userRepo, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepo, PasswordEncoder passwordEncoder, CloudinaryService cloudinaryService) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
+        this.cloudinaryService = cloudinaryService;
     }
 
 
@@ -69,6 +69,24 @@ public class UserService {
     }
 
     @Transactional
+    public void updateProfilePicture(User user, ProfilePictureUploadDto profilePictureUploadDto) {
+        user.setProfilePictureUrl(profilePictureUploadDto.imageUrl());
+        userRepo.save(user);
+    }
+
+    @Transactional
+    public void removeUserProfilePicture(User user) {
+        String existingImageUrl = user.getProfilePictureUrl();
+
+        user.setProfilePictureUrl(null);
+        userRepo.save(user);
+
+        if (existingImageUrl != null && !existingImageUrl.isEmpty()) {
+            cloudinaryService.deleteImage(existingImageUrl);
+        }
+    }
+
+    @Transactional
     public void changePassword(User user, PasswordChangeDto passwordChangeDto) {
         if (!passwordEncoder.matches(passwordChangeDto.currentPassword(), user.getPassword()))
             throw new ConflictException("Incorrect current password.");
@@ -98,9 +116,6 @@ public class UserService {
                 .toList();
     }
 
-    public Optional<User> findById(Long id) {
-        return userRepo.findById(id);
-    }
     public Optional<User> findByEmail(String email) {
         return userRepo.findByEmail(email);
     }

@@ -23,7 +23,7 @@ public class EntityToDtoMappings {
                         (att.getStatus() == AttendanceStatus.REGISTERED || att.getStatus() == AttendanceStatus.ATTENDED))
                 .map(Attendance::getUser)
                 .map(user -> new UserSummaryDto(
-                        user.getId(), user.getFirstName(), user.getLastName(), user.getEmail()
+                        user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getProfilePictureUrl()
                 ))
                 .toList();
 
@@ -32,7 +32,7 @@ public class EntityToDtoMappings {
                         (att.getStatus() == AttendanceStatus.REGISTERED || att.getStatus() == AttendanceStatus.ATTENDED))
                 .map(Attendance::getUser)
                 .map(user -> new UserSummaryDto(
-                        user.getId(), user.getFirstName(), user.getLastName(), user.getEmail()
+                        user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getProfilePictureUrl()
                 ))
                 .toList();
 
@@ -80,6 +80,7 @@ public class EntityToDtoMappings {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
+                user.getProfilePictureUrl(),
                 (int) attendedEventsCount,
                 (int) organizedEventsCount,
                 (int) withdrawnFromEventsCount,
@@ -93,7 +94,8 @@ public class EntityToDtoMappings {
                 user.getId(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getEmail()
+                user.getEmail(),
+                user.getProfilePictureUrl()
         );
 
         Event event = attendance.getEvent();
@@ -121,7 +123,8 @@ public class EntityToDtoMappings {
                 invitee.getId(),
                 invitee.getFirstName(),
                 invitee.getLastName(),
-                invitee.getEmail()
+                invitee.getEmail(),
+                invitee.getProfilePictureUrl()
         );
 
         User invitor = invitation.getInvitor();
@@ -129,7 +132,8 @@ public class EntityToDtoMappings {
                 invitor.getId(),
                 invitor.getFirstName(),
                 invitor.getLastName(),
-                invitor.getEmail()
+                invitor.getEmail(),
+                invitor.getProfilePictureUrl()
         );
 
         EventResponseDto eventResponseDto = mapEventToResponseDto(invitation.getEvent());
@@ -150,7 +154,8 @@ public class EntityToDtoMappings {
                 recipient.getId(),
                 recipient.getFirstName(),
                 recipient.getLastName(),
-                recipient.getEmail()
+                recipient.getEmail(),
+                recipient.getProfilePictureUrl()
         );
 
         return new NotificationResponseDto(

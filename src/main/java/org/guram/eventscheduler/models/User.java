@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(exclude = { "password", "attendances", "sentInvitations", "receivedInvitations" })
+@ToString(exclude = { "profilePictureUrl", "password", "attendances", "sentInvitations", "receivedInvitations" })
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +38,8 @@ public class User {
     @Size(max = 100)
     @Column(unique = true, nullable = false, length = 100)
     private String email;
+
+    private String profilePictureUrl;
 
     @NotBlank
     @Column(nullable = false)

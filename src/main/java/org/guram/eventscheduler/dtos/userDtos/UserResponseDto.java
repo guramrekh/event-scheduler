@@ -7,6 +7,7 @@ public record UserResponseDto(
         @NotNull String firstName,
         @NotNull String lastName,
         @NotNull String email,
+        String profilePictureUrl,
         int attendedEventsCount,
         int organizedEventsCount,
         int withdrawnFromEventsCount,

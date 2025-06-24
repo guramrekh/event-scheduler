@@ -85,11 +85,6 @@ application-*.yml
 *.cert
 *.pem
 
-application-local.properties
-application-local.yml
-application-dev.properties # If you have local-only dev properties
-application-test.properties # If you have local-only test properties
-
 
 # Generated Files
 *.class
@@ -109,5 +104,6 @@ application-test.properties # If you have local-only test properties
 .history/ # VS Code history
 
 # SQL/DB specific (if not part of source code)
+data
 *.sql.bak
 *.db

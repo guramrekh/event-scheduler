@@ -28,7 +28,7 @@ public class Event {
     private Long id;
 
     @NotBlank()
-    @Size(min = 3, max = 100)
+    @Size(min = 1, max = 100)
     @Column(nullable = false, length = 100)
     private String title;
 
@@ -42,7 +42,7 @@ public class Event {
     private LocalDateTime dateTime;
 
     @NotBlank()
-    @Size(min = 3, max = 100)
+    @Size(min = 1, max = 100)
     @Column(length = 100)
     private String location;
 

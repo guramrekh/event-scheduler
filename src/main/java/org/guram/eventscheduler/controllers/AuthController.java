@@ -29,4 +29,5 @@ public class AuthController {
         URI location = URI.create("/users/" + newUser.id());
         return ResponseEntity.created(location).body(newUser);
     }
+
 }

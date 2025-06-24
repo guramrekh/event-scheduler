@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class NotificationService {
@@ -36,7 +35,7 @@ public class NotificationService {
     public List<NotificationResponseDto> getNotificationsForUser(User user) {
         return notificationRepo.findByRecipientOrderByCreatedAtDesc(user).stream()
                 .map(EntityToDtoMappings::mapNotificationToResponseDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public void markNotificationAsRead(Long notificationId, User user) {

@@ -12,6 +12,4 @@ import java.util.Optional;
 public interface InvitationRepository extends JpaRepository<Invitation, Long> {
     Optional<Invitation> findByInviteeAndEvent(User invitee, Event event);
     List<Invitation> findByInviteeAndStatusOrderByInvitationSentDateAsc(User invitee, InvitationStatus status);
-
-
 }

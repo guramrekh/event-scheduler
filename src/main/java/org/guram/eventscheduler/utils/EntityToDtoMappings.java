@@ -9,47 +9,40 @@ import org.guram.eventscheduler.dtos.userDtos.UserResponseDto;
 import org.guram.eventscheduler.dtos.userDtos.UserSummaryDto;
 import org.guram.eventscheduler.models.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class EntityToDtoMappings {
 
     public static EventResponseDto mapEventToResponseDto(Event event) {
-        var everyAttendance = event.getAttendances();
+        List<UserSummaryDto> attendees = new ArrayList<>();
+        List<UserSummaryDto> organizers = new ArrayList<>();
+        Map<Long, AttendanceStatus> userAttendanceStatusMap = new HashMap<>();
 
-        List<UserSummaryDto> attendees = everyAttendance.stream()
-                .filter(att -> att.getRole() == AttendanceRole.ATTENDEE &&
-                        (att.getStatus() == AttendanceStatus.REGISTERED || att.getStatus() == AttendanceStatus.ATTENDED))
-                .map(Attendance::getUser)
-                .map(user -> new UserSummaryDto(
+        for (Attendance att : event.getAttendances()) {
+            if (att.getStatus() == AttendanceStatus.REGISTERED ||
+                    att.getStatus() == AttendanceStatus.ATTENDED) {
+                User user = att.getUser();
+                UserSummaryDto userSummary = new UserSummaryDto(
                         user.getId(),
                         user.getFirstName(),
                         user.getLastName(),
                         user.getEmail(),
                         user.getBio(),
                         user.getProfilePictureUrl()
-                ))
-                .toList();
+                );
 
-        List<UserSummaryDto> organizers = everyAttendance.stream()
-                .filter(att -> att.getRole() == AttendanceRole.ORGANIZER &&
-                        (att.getStatus() == AttendanceStatus.REGISTERED || att.getStatus() == AttendanceStatus.ATTENDED))
-                .map(Attendance::getUser)
-                .map(user -> new UserSummaryDto(
-                        user.getId(),
-                        user.getFirstName(),
-                        user.getLastName(),
-                        user.getEmail(),
-                        user.getBio(),
-                        user.getProfilePictureUrl()
-                ))
-                .toList();
+                if (att.getRole() == AttendanceRole.ATTENDEE)
+                    attendees.add(userSummary);
+                else if (att.getRole() == AttendanceRole.ORGANIZER)
+                    organizers.add(userSummary);
 
-        Map<Long, AttendanceStatus> userAttendanceStatusMap = everyAttendance.stream()
-                .filter(att -> att.getStatus() == AttendanceStatus.REGISTERED ||
-                        att.getStatus() == AttendanceStatus.ATTENDED)
-                .collect(Collectors.toMap(att -> att.getUser().getId(), Attendance::getStatus));
+                userAttendanceStatusMap.put(user.getId(), att.getStatus());
+            }
+        }
+
 
         return new EventResponseDto(
                 event.getId(),
@@ -66,6 +59,7 @@ public class EntityToDtoMappings {
 
     public static UserResponseDto mapUserToResponseDto(User user) {
         var everyAttendance = user.getAttendances();
+
         long attendedEventsCount = everyAttendance.stream()
                 .filter(att -> att.getStatus() == AttendanceStatus.ATTENDED)
                 .count();

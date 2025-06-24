@@ -13,7 +13,6 @@ import java.util.Optional;
 
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     Optional<Attendance> findByUserAndEvent(User user, Event event);
-    List<Attendance> findByUserAndStatusOrderByEvent_DateTimeAsc(User user, AttendanceStatus status);
     List<Attendance> findByEventAndStatusOrderByEvent_DateTimeAsc(Event event, AttendanceStatus status);
 
     @Query("""

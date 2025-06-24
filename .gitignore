@@ -10,7 +10,7 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
-.mvn/wrapper/maven-wrapper.jar # Maven wrapper JAR (though mvnw and .mvn/wrapper/maven-wrapper.properties *are* usually tracked)
+.mvn/wrapper/maven-wrapper.jar
 
 
 # IntelliJ IDEA

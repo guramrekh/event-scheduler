@@ -37,5 +37,4 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             @Param("upcoming") boolean upcoming,
             @Param("cancelled") boolean cancelled
     );
-
 }

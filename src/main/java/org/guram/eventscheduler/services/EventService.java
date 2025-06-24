@@ -1,7 +1,6 @@
 package org.guram.eventscheduler.services;
 
-import org.guram.eventscheduler.dtos.eventDtos.EventCreateDto;
-import org.guram.eventscheduler.dtos.eventDtos.EventEditDto;
+import org.guram.eventscheduler.dtos.eventDtos.EventRequestDto;
 import org.guram.eventscheduler.dtos.eventDtos.EventResponseDto;
 import org.guram.eventscheduler.dtos.eventDtos.EventWithRoleDto;
 import org.guram.eventscheduler.exceptions.*;
@@ -42,12 +41,12 @@ public class EventService {
 
 
     @Transactional
-    public EventResponseDto createEvent(User organizer, EventCreateDto eventCreateDto) {
+    public EventResponseDto createEvent(User organizer, EventRequestDto eventRequestDto) {
         Event event = new Event();
-        event.setTitle(eventCreateDto.title());
-        event.setDescription(eventCreateDto.description());
-        event.setDateTime(eventCreateDto.dateTime());
-        event.setLocation(eventCreateDto.location());
+        event.setTitle(eventRequestDto.title());
+        event.setDescription(eventRequestDto.description());
+        event.setDateTime(eventRequestDto.dateTime());
+        event.setLocation(eventRequestDto.location());
 
         Attendance organizerAttendance = new Attendance(organizer, event, AttendanceRole.ORGANIZER);
 
@@ -128,19 +127,15 @@ public class EventService {
 
     @Transactional
     public EventResponseDto editEvent(Long eventId, Long actorUserId,
-                                      EventEditDto eventEditDto, boolean notifyParticipants) {
+                                      EventRequestDto eventRequestDto, boolean notifyParticipants) {
         Event event = findEventById(eventId);
 
         checkIsOrganizer(actorUserId, event);
 
-        if (eventEditDto.title() != null)
-            event.setTitle(eventEditDto.title());
-        if (eventEditDto.description() != null)
-            event.setDescription(eventEditDto.description());
-        if (eventEditDto.dateTime() != null)
-            event.setDateTime(eventEditDto.dateTime());
-        if (eventEditDto.location() != null)
-            event.setLocation(eventEditDto.location());
+        event.setTitle(eventRequestDto.title());
+        event.setDescription(eventRequestDto.description());
+        event.setDateTime(eventRequestDto.dateTime());
+        event.setLocation(eventRequestDto.location());
 
         Event editedEvent = eventRepo.save(event);
 
@@ -148,7 +143,6 @@ public class EventService {
             String message = notificationService.generateEventUpdatedMessage(editedEvent);
             attendanceRepo.findByEventAndStatusOrderByEvent_DateTimeAsc(editedEvent, AttendanceStatus.REGISTERED).stream()
                     .map(Attendance::getUser)
-                    .distinct()
                     .forEach(user -> notificationService.createNotification(user, message, NotificationType.EVENT_DETAILS_UPDATED));
 
             editedEvent.getInvitations().stream()

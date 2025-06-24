@@ -79,4 +79,5 @@ public class AttendanceService {
 
         return attendance.getRole();
     }
+
 }

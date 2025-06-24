@@ -1,8 +1,7 @@
 package org.guram.eventscheduler.controllers;
 
 import jakarta.validation.Valid;
-import org.guram.eventscheduler.dtos.eventDtos.EventCreateDto;
-import org.guram.eventscheduler.dtos.eventDtos.EventEditDto;
+import org.guram.eventscheduler.dtos.eventDtos.EventRequestDto;
 import org.guram.eventscheduler.dtos.eventDtos.EventResponseDto;
 import org.guram.eventscheduler.dtos.eventDtos.EventWithRoleDto;
 import org.guram.eventscheduler.models.AttendanceRole;
@@ -46,10 +45,10 @@ public class EventController {
 
     @PostMapping("/create")
     public ResponseEntity<EventResponseDto> createEvent(
-                                    @Valid @RequestBody EventCreateDto eventCreateDto,
+                                    @Valid @RequestBody EventRequestDto eventRequestDto,
                                     @AuthenticationPrincipal UserDetails userDetails) {
         User currentUser = userService.getCurrentUser(userDetails);
-        EventResponseDto event = eventService.createEvent(currentUser, eventCreateDto);
+        EventResponseDto event = eventService.createEvent(currentUser, eventRequestDto);
         URI location = URI.create("/events/" + event.id());
         return ResponseEntity.created(location).body(event);
     }
@@ -58,10 +57,10 @@ public class EventController {
     public ResponseEntity<EventResponseDto> editEvent(
                                     @PathVariable Long eventId,
                                     @RequestParam(defaultValue = "true") boolean notifyParticipants,
-                                    @Valid @RequestBody EventEditDto eventEditDto,
+                                    @Valid @RequestBody EventRequestDto eventRequestDto,
                                     @AuthenticationPrincipal UserDetails userDetails) {
         Long currentUserId = userService.getCurrentUser(userDetails).getId();
-        EventResponseDto event = eventService.editEvent(eventId, currentUserId, eventEditDto, notifyParticipants);
+        EventResponseDto event = eventService.editEvent(eventId, currentUserId, eventRequestDto, notifyParticipants);
         return ResponseEntity.ok(event);
     }
 

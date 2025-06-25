@@ -57,14 +57,20 @@
   - CDN delivery for fast loading
 
 
+## Frontend Repository
+
+The [client-side of this app](https://github.com/guramkhech/event-scheduler-frontend) is developed with **React** and **Material-UI**
+
 ## Getting Started
 
-### Prerequisites
+### Backend Setup
+
+#### Prerequisites
 - **Java 17+** (JDK 17 or higher)
 - **Maven 3.9+** (or use included Maven Wrapper)
 - **PostgreSQL** (for production deployment)
 
-### Environment Setup
+#### Environment Setup
 
 1. **Clone the repository**
    ```bash
@@ -79,11 +85,11 @@
    spring.datasource.url=jdbc:postgresql://localhost:5432/event_scheduler
    spring.datasource.username=your_db_username
    spring.datasource.password=your_db_password
-   
+
    # JPA Configuration
    spring.jpa.hibernate.ddl-auto=update
    spring.jpa.show-sql=false
-   
+
    # Cloudinary Configuration
    cloudinary.cloud_name=your_cloud_name
    cloudinary.api_key=your_api_key
@@ -94,16 +100,13 @@
    ```bash
    # Using Maven Wrapper (recommended)
    ./mvnw spring-boot:run
-   
+
    # Or using installed Maven
    mvn spring-boot:run
    ```
 
-4. **Access the application**
-   - API Base URL: `http://localhost:8080`
 
-
-### Development Setup
+#### Development Setup
 
 For development with H2 in-memory database:
 ```properties
@@ -114,9 +117,46 @@ spring.h2.console.enabled=true
 spring.jpa.hibernate.ddl-auto=create-drop
 ```
 
-### Building for Production
+#### Building for Production
 ```bash
 ./mvnw clean package
 java -jar target/event-scheduler-0.0.1-SNAPSHOT.jar
 ```
 
+### Frontend Setup
+
+#### Prerequisites
+- **Node.js** (v14.0+ recommended)
+- **npm** (v6.0+ recommended)
+
+#### Environment Setup
+
+1. **Clone the frontend repository**
+   ```bash
+   git clone git@github.com:guramrekh/event-scheduler-frontend.git
+   cd event-scheduler-frontend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   # Using npm
+   npm install
+   ```
+
+3. **Run the development server**
+   ```bash
+   # Using npm
+   npm start
+   ```
+
+4. **Access the application**
+   - Frontend URL: `http://localhost:3000`
+
+#### Building for Production
+
+```bash
+# Using npm
+npm run build
+```
+
+The build artifacts will be stored in the `build/` directory, ready to be deployed to a static hosting service.

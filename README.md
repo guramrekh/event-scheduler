@@ -39,7 +39,6 @@
 
 - ### Spring Boot
     - Built-in security, data access, validation, and web capabilities
-    - Version 3.5.x with Java 17 support and enhanced performance
 
 - ### PostgreSQL/H2
     - PostgreSQL for production
@@ -59,7 +58,8 @@
 
 ## Frontend Repository
 
-The [client-side of this app](https://github.com/guramkhech/event-scheduler-frontend) is developed with **React** and **Material-UI**
+The [client-side of this app](https://github.com/guramkhech/event-scheduler-frontend) is developed with **Cursor** and **Lovable**
+
 
 ## Getting Started
 

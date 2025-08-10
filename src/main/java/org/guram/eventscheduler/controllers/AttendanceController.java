@@ -1,7 +1,6 @@
 package org.guram.eventscheduler.controllers;
 
 import org.guram.eventscheduler.dtos.attendanceDtos.AttendanceResponseDto;
-import org.guram.eventscheduler.models.AttendanceStatus;
 import org.guram.eventscheduler.models.User;
 import org.guram.eventscheduler.services.AttendanceService;
 import org.guram.eventscheduler.services.UserService;
@@ -9,9 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/attendances")

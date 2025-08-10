@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.util.StringUtils;
-
 import java.util.function.Supplier;
 
 public final class SpaCsrfTokenRequestHandler extends CsrfTokenRequestAttributeHandler {

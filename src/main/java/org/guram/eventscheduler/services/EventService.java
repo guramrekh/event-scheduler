@@ -3,18 +3,28 @@ package org.guram.eventscheduler.services;
 import org.guram.eventscheduler.dtos.eventDtos.EventRequestDto;
 import org.guram.eventscheduler.dtos.eventDtos.EventResponseDto;
 import org.guram.eventscheduler.dtos.eventDtos.EventWithRoleDto;
-import org.guram.eventscheduler.exceptions.*;
-import org.guram.eventscheduler.models.*;
+import org.guram.eventscheduler.exceptions.ConflictException;
+import org.guram.eventscheduler.exceptions.EventNotFoundException;
+import org.guram.eventscheduler.exceptions.ForbiddenOperationException;
+import org.guram.eventscheduler.exceptions.InvalidStatusTransitionException;
+import org.guram.eventscheduler.exceptions.ResourceNotFoundException;
+import org.guram.eventscheduler.exceptions.UserNotFoundException;
+import org.guram.eventscheduler.models.Attendance;
+import org.guram.eventscheduler.models.AttendanceRole;
+import org.guram.eventscheduler.models.AttendanceStatus;
+import org.guram.eventscheduler.models.Event;
+import org.guram.eventscheduler.models.Invitation;
+import org.guram.eventscheduler.models.InvitationStatus;
+import org.guram.eventscheduler.models.NotificationType;
+import org.guram.eventscheduler.models.User;
 import org.guram.eventscheduler.repositories.AttendanceRepository;
 import org.guram.eventscheduler.repositories.EventRepository;
 import org.guram.eventscheduler.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.stream.Collectors;
-
 import static org.guram.eventscheduler.utils.EntityToDtoMappings.mapEventToResponseDto;
 
 @Service

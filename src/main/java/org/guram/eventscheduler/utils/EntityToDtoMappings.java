@@ -7,8 +7,13 @@ import org.guram.eventscheduler.dtos.invitationDtos.InvitationResponseDto;
 import org.guram.eventscheduler.dtos.notificationDtos.NotificationResponseDto;
 import org.guram.eventscheduler.dtos.userDtos.UserResponseDto;
 import org.guram.eventscheduler.dtos.userDtos.UserSummaryDto;
-import org.guram.eventscheduler.models.*;
-
+import org.guram.eventscheduler.models.Attendance;
+import org.guram.eventscheduler.models.AttendanceRole;
+import org.guram.eventscheduler.models.AttendanceStatus;
+import org.guram.eventscheduler.models.Event;
+import org.guram.eventscheduler.models.Invitation;
+import org.guram.eventscheduler.models.Notification;
+import org.guram.eventscheduler.models.User;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +47,6 @@ public class EntityToDtoMappings {
                 userAttendanceStatusMap.put(user.getId(), att.getStatus());
             }
         }
-
 
         return new EventResponseDto(
                 event.getId(),

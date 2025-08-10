@@ -29,9 +29,9 @@
 - **Read Status Management**: Mark individual or all notifications as read
 
 ### Profile Customization
-- **Add bio**: Personalize your profile with a custom bio (up to 500 characters)
-- **Upload profile picture**: Upload and manage profile pictures via Cloudinary integration with secure signed URLs
-- **Password Management**: Secure password change with validation and BCrypt encryption
+- **Add bio**: Personalize your profile with a custom bio
+- **Upload profile picture**: Upload and manage profile pictures with secure signed URLs
+- **Password Management**: Secure password change with validation and encryption
 - **Delete Account**: Permanently remove your account and all associated data with proper cleanup 
 
 
@@ -42,8 +42,8 @@
 
 - ### PostgreSQL/H2
     - PostgreSQL for production
-    - H2 in-memory database for rapid development
-    - JPA/Hibernate ORM for seamless database operations
+    - H2 in-memory database for development
+    - JPA/Hibernate for database operations
 
 - ### Maven
     - Dependency management and build automation tool

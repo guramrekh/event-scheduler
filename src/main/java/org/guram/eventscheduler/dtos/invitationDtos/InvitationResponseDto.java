@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotNull;
 import org.guram.eventscheduler.dtos.eventDtos.EventResponseDto;
 import org.guram.eventscheduler.dtos.userDtos.UserSummaryDto;
 import org.guram.eventscheduler.models.InvitationStatus;
-
 import java.time.LocalDateTime;
 
 public record InvitationResponseDto(

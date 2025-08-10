@@ -3,7 +3,6 @@ package org.guram.eventscheduler.cloudinary;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,9 +45,10 @@ public class CloudinaryService {
     private String extractPublicIdFromUrl(String url) {
         Pattern pattern = Pattern.compile("/upload/(?:v\\d+/)?([^.]+)");
         Matcher matcher = pattern.matcher(url);
-        if (matcher.find()) {
+        if (matcher.find())
             return matcher.group(1);
-        }
+
         return null;
     }
+
 }

@@ -4,15 +4,17 @@ import org.guram.eventscheduler.dtos.attendanceDtos.AttendanceResponseDto;
 import org.guram.eventscheduler.exceptions.ConflictException;
 import org.guram.eventscheduler.exceptions.EventNotFoundException;
 import org.guram.eventscheduler.exceptions.ResourceNotFoundException;
-import org.guram.eventscheduler.models.*;
+import org.guram.eventscheduler.models.Attendance;
+import org.guram.eventscheduler.models.AttendanceRole;
+import org.guram.eventscheduler.models.AttendanceStatus;
+import org.guram.eventscheduler.models.Event;
+import org.guram.eventscheduler.models.User;
 import org.guram.eventscheduler.repositories.AttendanceRepository;
 import org.guram.eventscheduler.repositories.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Optional;
-
 import static org.guram.eventscheduler.utils.EntityToDtoMappings.mapAttendanceToResponseDto;
 
 @Service

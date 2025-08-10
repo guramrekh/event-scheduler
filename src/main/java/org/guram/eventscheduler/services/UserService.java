@@ -1,7 +1,11 @@
 package org.guram.eventscheduler.services;
 
 import org.guram.eventscheduler.cloudinary.CloudinaryService;
-import org.guram.eventscheduler.dtos.userDtos.*;
+import org.guram.eventscheduler.dtos.userDtos.PasswordChangeDto;
+import org.guram.eventscheduler.dtos.userDtos.ProfilePictureUploadDto;
+import org.guram.eventscheduler.dtos.userDtos.UserCreateDto;
+import org.guram.eventscheduler.dtos.userDtos.UserProfileEditDto;
+import org.guram.eventscheduler.dtos.userDtos.UserResponseDto;
 import org.guram.eventscheduler.exceptions.ConflictException;
 import org.guram.eventscheduler.exceptions.UserNotFoundException;
 import org.guram.eventscheduler.models.User;
@@ -12,10 +16,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
-
 import static org.guram.eventscheduler.utils.EntityToDtoMappings.mapUserToResponseDto;
 
 @Service
@@ -74,7 +76,7 @@ public class UserService {
     }
 
     @Transactional
-    public void removeUserProfilePicture(User user) {
+    public void removeProfilePicture(User user) {
         String existingImageUrl = user.getProfilePictureUrl();
 
         user.setProfilePictureUrl(null);
@@ -91,9 +93,10 @@ public class UserService {
             throw new ConflictException("Incorrect current password.");
 
         if (passwordEncoder.matches(passwordChangeDto.newPassword(), user.getPassword()))
-            throw new ConflictException("New password cannot be the same as the old password");
+            throw new ConflictException("New password cannot be same as the old password");
 
-        user.setPassword(passwordEncoder.encode(passwordChangeDto.newPassword()));
+        String hashedPassword = passwordEncoder.encode(passwordChangeDto.newPassword());
+        user.setPassword(hashedPassword);
         userRepo.save(user);
     }
 

@@ -6,7 +6,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
-
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,7 +15,6 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Handles resource not found exceptions (404)
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
@@ -28,7 +26,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
-    // Handles forbidden operations (403)
     @ExceptionHandler(ForbiddenOperationException.class)
     public ResponseEntity<Object> handleForbiddenOperationException(ForbiddenOperationException ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
@@ -40,7 +37,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
-    // Handles conflicts (409)
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<Object> handleConflictException(ConflictException ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
@@ -52,7 +48,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 
-    // Handles invalid status transitions or other bad requests (400)
     @ExceptionHandler(InvalidStatusTransitionException.class)
     public ResponseEntity<Object> handleInvalidStatusTransitionException(InvalidStatusTransitionException ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
@@ -64,7 +59,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    // Handles @Valid annotation failures (e.g., @NotBlank, @NotNull on DTOs)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
@@ -82,7 +76,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    // Generic exception handler for any other unhandled exceptions (500)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
         Map<String, Object> body = new LinkedHashMap<>();
@@ -91,7 +84,7 @@ public class GlobalExceptionHandler {
         body.put("error", HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
         body.put("message", "An unexpected error occurred: " + ex.getMessage());
         body.put("path", request.getDescription(false).replace("uri=", ""));
-        ex.printStackTrace();
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 }

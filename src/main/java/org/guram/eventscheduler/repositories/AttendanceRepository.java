@@ -2,7 +2,6 @@ package org.guram.eventscheduler.repositories;
 
 import jakarta.transaction.Transactional;
 import org.guram.eventscheduler.models.Attendance;
-import org.guram.eventscheduler.models.AttendanceRole;
 import org.guram.eventscheduler.models.AttendanceStatus;
 import org.guram.eventscheduler.models.Event;
 import org.guram.eventscheduler.models.User;
@@ -22,14 +21,10 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     @Transactional
     @Query("""
         UPDATE Attendance a
-        SET a.status = :attended
+        SET a.status = org.guram.eventscheduler.models.AttendanceStatus.ATTENDED
         WHERE a.event = :event
-            AND a.status = :registered
+            AND a.status = org.guram.eventscheduler.models.AttendanceStatus.REGISTERED
     """)
-    void markAllAsAttended(
-            @Param("event") Event event,
-            @Param("registered") AttendanceStatus registered,
-            @Param("attended") AttendanceStatus attended
-    );
+    void markAllAsAttended(@Param("event") Event event);
 
 }

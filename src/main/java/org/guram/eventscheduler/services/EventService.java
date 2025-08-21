@@ -228,7 +228,7 @@ public class EventService {
 
         checkIsOrganizer(organizer.getId(), event);
 
-        attendanceRepo.markAllAsAttended(event, AttendanceStatus.REGISTERED, AttendanceStatus.ATTENDED);
+        attendanceRepo.markAllAsAttended(event);
 
         return mapEventToResponseDto(event);
     }

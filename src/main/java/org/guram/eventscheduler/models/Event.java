@@ -68,4 +68,11 @@ public class Event {
     @OrderBy("invitationSentDate DESC")
     private List<Invitation> invitations = new ArrayList<>();
 
+
+    public Event(String title, LocalDateTime dateTime, String location) {
+        this.title = title;
+        this.dateTime = dateTime;
+        this.location = location;
+    }
+
 }
